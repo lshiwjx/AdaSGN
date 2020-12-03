@@ -1,0 +1,1 @@
+from .loss_cross_entroy import naive_cross_entropy_loss, multi_cross_entropy_loss, LabelSmoothingLoss
