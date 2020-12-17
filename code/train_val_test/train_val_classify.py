@@ -17,7 +17,7 @@ def mixup(input, target, gamma):
     return input.mul_(gamma).add_(1 - gamma, perm_input), target.mul_(gamma).add_(1 - gamma, perm_target)
 
 
-def train_classifier(data_loader, model, loss_function, optimizer, global_step, args, writer):
+def train_classifier(data_loader, model, loss_function, optimizer, global_step, args, writer, loger, *keys, **kwargs):
     process = tqdm(IteratorTimer(data_loader), desc='Train: ')
     for index, (inputs, labels, names) in enumerate(process):
 
@@ -46,7 +46,7 @@ def train_classifier(data_loader, model, loss_function, optimizer, global_step, 
     return global_step
 
 
-def val_classifier(data_loader, model, loss_function, global_step, args, writer):
+def val_classifier(data_loader, model, loss_function, global_step, args, writer, loger, *keys, **kwargs):
     process = tqdm(IteratorTimer(data_loader), desc='Val: ')
     score_frag = []
     all_pre_true = []

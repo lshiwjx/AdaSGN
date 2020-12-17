@@ -3,46 +3,6 @@ import torch.nn.functional as func
 import torch.nn as nn
 
 
-# def to_onehot(num_class, label, alpha):
-#     return torch.zeros((label.shape[0], num_class)).fill_(alpha).scatter_(1, label.unsqueeze(1), 1 - alpha)
-
-
-# class naive_cross_entropy_loss(nn.Module):
-#     def __init__(self, num_class, alpha):
-#         self.num_class = num_class
-#         self.alpha = alpha
-#         super(naive_cross_entropy_loss, self).__init__()
-#
-#     def forward(self, inputs, target):
-#         target = to_onehot(self.num_class, target, self.alpha)
-#         return - (func.log_softmax(inputs, dim=-1) * target).sum(dim=-1).mean()
-
-
-class multi_cross_entropy_loss(nn.Module):
-    def __init__(self):
-        self.loss = torch.nn.CrossEntropyLoss(size_average=True)
-        super(multi_cross_entropy_loss, self).__init__()
-
-    def forward(self, inputs, target):
-        '''
-
-            :param inputs: N C S
-            :param target: N C
-            :return:
-            '''
-        num = inputs.shape[-1]
-        inputs_splits = torch.chunk(inputs, num, dim=-1)
-        loss = self.loss(inputs_splits[0].squeeze(-1), target)
-        for i in range(1, num):
-            loss += self.loss(inputs_splits[i].squeeze(-1), target)
-        loss /= num
-        return loss
-
-
-def naive_cross_entropy_loss(inputs, target):
-    return - (func.log_softmax(inputs, dim=-1) * target).sum(dim=-1).mean()
-
-
 class LabelSmoothingLoss(nn.Module):
     def __init__(self, classes, smoothing=0.0, dim=-1):
         super(LabelSmoothingLoss, self).__init__()
@@ -60,17 +20,53 @@ class LabelSmoothingLoss(nn.Module):
         return torch.mean(torch.sum(-true_dist * pred, dim=self.dim))
 
 
-# def multi_cross_entropy_loss(inputs, target):
-#     '''
-#
-#     :param inputs: N C S
-#     :param target: N C
-#     :return:
-#     '''
-#     num = inputs.shape[-1]
-#     inputs_splits = torch.chunk(inputs, num, dim=-1)
-#     loss = - (func.log_softmax(inputs_splits[0].squeeze(-1), dim=-1) * target).sum(dim=-1).mean()
-#     for i in range(1, num):
-#         loss += - (func.log_softmax(inputs_splits[i].squeeze(-1), dim=-1) * target).sum(dim=-1).mean()
-#     loss /= num
-#     return loss
+class AdaLoss(nn.Module):
+    def __init__(self, classes, alpha=1, label_smoothing_num=0.0, dim=-1, freeze_alpha=0, warm_epoch=0, beta=0,
+                 begin_action=1):
+        super().__init__()
+        self.CE = LabelSmoothingLoss(classes, label_smoothing_num, dim)
+        self.alpha = alpha
+        self.freeze_alpha = freeze_alpha
+        self.warm_epoch = warm_epoch
+        self.beta = beta
+        self.begin_action = begin_action
+
+    def forward(self, pred, target, flops_vector, actions, epoch):
+        """
+
+        :param pred: N, num_cls
+        :param target: N
+        :param flops_vector: num_act
+        :param actions: num_act N 1 1 T
+        :return:
+        """
+        if epoch < self.freeze_alpha:
+            alpha = 0
+        else:
+            if self.warm_epoch != 0:
+                ratio = min(epoch / self.warm_epoch, 1)
+            else:
+                ratio = 1
+            alpha = self.alpha * ratio
+        flops_vector = flops_vector.to(target.device)
+        # ls_flops = (torch.mean(torch.mean(actions[self.begin_action:], dim=(2, 3, 4)).transpose(1, 0) *
+        #                        flops_vector[self.begin_action:].unsqueeze(0)) + flops_vector[0]) * alpha
+
+        ls_flops = torch.mean(
+            torch.mean(actions[self.begin_action:], dim=(2, 3, 4)).transpose(1, 0) *
+                              flops_vector[self.begin_action:].unsqueeze(0)) * alpha
+        ls_cls = self.CE(pred, target)
+        avg_action = torch.mean(actions, dim=(1, 2, 3, 4))
+        ls_uniform = torch.norm(avg_action - avg_action.mean(), p=2) * self.beta
+        return ls_flops, ls_cls, ls_uniform
+
+
+if __name__ == '__main__':
+    cls = 5
+    num_a = 3
+    l = AdaLoss(cls)
+    pred = torch.randn([1, cls])
+    target = torch.zeros(1, dtype=torch.long)
+    fv = torch.randn(num_a)
+    act = torch.randn([num_a, 1, 1, 1, 20])
+    l(pred, target, fv, act, 0)

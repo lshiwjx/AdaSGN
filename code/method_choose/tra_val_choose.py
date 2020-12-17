@@ -7,6 +7,9 @@ def train_val_choose(args, block):
     if args.pipeline == 'classify':
         train_net = train_classifier
         val_net = val_classifier
+    elif args.pipeline == 'classify_ada':
+        train_net = train_ada
+        val_net = val_ada
     else:
         raise ValueError("args of train val is not right")
 

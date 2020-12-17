@@ -16,6 +16,7 @@ import pickle
 import numpy as np
 import random
 from utility.log import IteratorTimer, Logger, Recorder
+import traceback
 
 
 class Processor:
@@ -71,26 +72,32 @@ class Processor:
             self.lr_scheduler.step(epoch=self.epoch)
 
         self.lr = self.optimizer.param_groups[0]['lr']
-        # self.block.log('Current lr: {}'.format(self.lr))
-
-        for key, value in self.model.named_parameters():
-            value.requires_grad = True
+        self.weight_decay = self.optimizer.param_groups[0]['weight_decay']
 
         for freeze_key, freeze_epoch in self.args.freeze_keys:
             if freeze_epoch > self.epoch:
                 self.block.log('{} is froze'.format(freeze_key))
                 for key, value in self.model.named_parameters():
                     if freeze_key in key:
-                        # self.block.log('{} is froze'.format(key))
                         value.requires_grad = False
+            else:
+                self.block.log('{} is not froze'.format(freeze_key))
+                for key, value in self.model.named_parameters():
+                    if freeze_key in key:
+                        value.requires_grad = True
 
         for lr_key, ratio_lr, ratio_wd, lr_epoch in self.args.lr_multi_keys:
             if lr_epoch > self.epoch:
-                self.block.log('lr for {}: {}*{}, wd: {}*{}'.format(lr_key, self.lr, ratio_lr, self.args.wd, ratio_wd))
+                self.block.log('lr for {}: {}*{}, wd: {}*{}'.format(lr_key, self.lr, ratio_lr, self.weight_decay, ratio_wd))
                 for param in self.optimizer.param_groups:
                     if lr_key in param['key']:
-                        param['lr'] *= ratio_lr
-                        param['weight_decay'] *= ratio_wd
+                        param['lr'] = ratio_lr * self.lr
+                        param['weight_decay'] = ratio_wd * self.weight_decay
+            else:
+                for param in self.optimizer.param_groups:
+                    if lr_key in param['key']:
+                        param['lr'] = self.lr
+                        param['weight_decay'] = self.weight_decay
 
     def save_model(self):
         # save latest
@@ -123,7 +130,8 @@ class Processor:
             if self.args.val_first or self.args.eval:
                 self.model.eval()
                 loss, acc, self.score_dict, self.all_pre_true, self.wrong_path_pre_true = self.val_net(
-                    self.data_loader_val, self.model, self.loss_function, self.global_step, self.args, None)
+                    self.data_loader_val, self.model, self.loss_function, self.global_step, self.args, None, self.block,
+                    self.epoch)
                 self.block.log('Init ACC: {}'.format(acc))
                 if self.args.eval:
                     exit()
@@ -134,12 +142,14 @@ class Processor:
 
                 self.model.train()  # Set model to training mode
                 self.global_step = self.train_net(self.data_loader_train, self.model, self.loss_function,
-                                                  self.optimizer, self.global_step, self.args, self.train_writer)
+                                                  self.optimizer, self.global_step, self.args, self.train_writer,
+                                                  self.block, self.epoch)
                 # self.block.log('Training finished for epoch {}'.format(self.epoch))
 
                 self.model.eval()
                 loss, acc, self.score_dict, self.all_pre_true, self.wrong_path_pre_true = self.val_net(
-                    self.data_loader_val, self.model, self.loss_function, self.global_step, self.args, self.val_writer)
+                    self.data_loader_val, self.model, self.loss_function, self.global_step, self.args, self.val_writer,
+                    self.block, self.epoch)
                 # self.block.log('Validation finished for epoch {}'.format(self.epoch))
 
                 self.train_writer.add_scalar('epoch', self.epoch, self.global_step)
@@ -148,6 +158,8 @@ class Processor:
 
                 self.losses.update(loss)
                 self.acces.update(acc)
+
+                self.val_writer.add_scalar('best_acc', self.acces.best_val, self.global_step)
 
                 self.block.log('EPOCH: {}, ACC: {:4f}, LOSS: {:4f}, EPOCH_TIME: {:4f}, LR: {}, BEST_ACC: {:4f}'
                                .format(self.epoch, acc, loss, self.process.iterable.last_duration, self.lr,
@@ -159,8 +171,8 @@ class Processor:
                            + '.state, acc: ' + str(self.acces.best_val))
             self.val_writer.close()
             self.train_writer.close()
-        except Exception as e:
-            print(e)
+        except Exception:
+            print(traceback.format_exc())
             self.val_writer.close()
             self.train_writer.close()
 

@@ -1,6 +1,10 @@
 import torch
-from code.utility.vis_env import *
+from utility.vis_env import *
 
-a = torch.load('/home/lshi/Project/Pytorch/DSTA-Net/train_val_test/work_dir/ntu20/skenet_drop0_glo_sub2_atts11_ffd1357_noalpha-latest.state')
+a = torch.load('../../work_dir/ntu60/sgnsingle25_transformfix30_valfirst_smallnew-latest.state', map_location='cpu')
+# a = torch.load('../../pretrain_models/single_sgn_jpt5.state', map_location='cpu')
 m = a['model']
-s = a['model']['attention_layers.0.atts.0.glo_reg_att'].cpu().numpy()
+s = abs(m['transform'].numpy())
+plt.imshow(s, cmap='gray');plt.show()
+s = a['model']['transforms']
+print('fds')

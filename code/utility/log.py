@@ -71,7 +71,7 @@ class Recorder:
             self.best_val = val
             self.best_at = self.count
         self.val = val
-        self.sum += val * n
+        self.sum += val
         self.count += n
         self.avg = self.sum / self.count
 

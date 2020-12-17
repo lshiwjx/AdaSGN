@@ -6,27 +6,19 @@ import shutil
 
 
 def optimizer_choose(model, args, block):
-    params = []
+    # params = []
     opt_param = args.optimizer_param
-    for key, value in model.named_parameters():
-        if value.requires_grad:
-            params += [{'params': [value], 'lr': opt_param.lr, 'key': key, 'weight_decay': opt_param.wd}]
+    # for key, value in model.named_parameters():
+    #     params += [{'params': [value], 'lr': opt_param.lr, 'key': key, 'weight_decay': opt_param.wd}]
 
     if args.optimizer == 'adam':
-        optimizer = torch.optim.Adam(params)
-        block.log('Using Adam optimizer')
+        optimizer = torch.optim.Adam(model.parameters(), **opt_param)
+        block.log('Using Adam optimizer ' + str(opt_param))
     elif args.optimizer == 'sgd':
-        momentum = 0.9
-        optimizer = SGD(params, momentum=momentum)
-        block.log('Using SGD with momentum ' + str(momentum))
-    elif args.optimizer == 'sgd_nev':
-        momentum = 0.9
-        optimizer = SGD(params, momentum=momentum, nesterov=True)
-        block.log('Using SGD with momentum ' + str(momentum) + 'and nesterov')
+        optimizer = SGD(model.parameters(), **opt_param)
+        block.log('Using SGD with momentum ' + str(opt_param))
     else:
-        momentum = 0.9
-        optimizer = SGD(params, momentum=momentum)
-        block.log('Using SGD with momentum ' + str(momentum))
+        raise RuntimeError('No such optimizer')
 
     # shutil.copy2(inspect.getfile(optimizer), args.model_saved_name)
     shutil.copy2(__file__, args.model_saved_name)

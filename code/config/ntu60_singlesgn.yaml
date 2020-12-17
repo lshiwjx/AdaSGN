@@ -23,11 +23,14 @@ data_param:
     eval: False
     turn2to1: False
 
-model: 'sgn'
+model: 'single_sgn'
 model_param:
   seg: 20
   num_joint: 25
   dim: 256
+  num_joint_ori: 25
+  adaptive_transform: True
+  gcn_type: 'big'
 
 pipeline: 'classify'
 pipeline_param:
@@ -56,12 +59,12 @@ batch_size: 64
 worker: 32
 pin_memory: False
 max_epoch: 120
-num_epoch_per_save: 200
-model_saved_name: '../work_dir/ntu60/sgn_2020_newdata_rot17___'
+num_epoch_per_save: 50
+model_saved_name: '../work_dir/ntu60/sgnsingle25_transformadap_valfirst_bignew_soft'
 last_model:
 pre_trained_model:
 ignore_weights: []
 val_first: False
 device_id: [0]
-cuda_visible_device: '0'
+cuda_visible_device: '4'
 debug: False

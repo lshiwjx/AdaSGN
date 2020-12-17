@@ -35,24 +35,27 @@ if __name__ == '__main__':
     label_path = "../../data/ntu60/CS/test_label.pkl"
 
     kwards = {
-        "window_size": 150,
-        "final_size": 128,
-        "random_choose": True,
-        "center_choose": True,
-        "turn2to1": True
+        "window_size": 20,
+        "final_size": 20,
+        "random_choose": False,
+        "center_choose": False,
+        # "turn2to1": True
         # 'rotation': [[-30, 30],[-30, 30],[-30, 30]]
         # "to_sparse": [128, 64, 64, 64],
         # "to_volume": [16, 16, 16],
         # 'fea_augment': True,
         # 'eval': True
+        'rot_norm': True
     }
 
     dataset = NTU_SKE(data_path, label_path, **kwards)
-    a = dataset.__getitem__(0)
+    # a = dataset.__getitem__(0)
 
-    labels = open('../prepare/ntu_120/label.txt', 'r').readlines()
+    # dataset.statistic_distance_variance(1000)
 
-    test_one(dataset, plot_skeleton, lambda x: x.transpose(1, 0, 2, 3), vid=vid, edges=edge, is_3d=True, pause=0.01,
+    labels = open('../prepare/ntu/statistics/class_name.txt', 'r').readlines()
+
+    test_one(dataset, plot_skeleton, lambda x: x.transpose(1, 0, 2, 3), vid=vid, edges=edge, is_3d=True, pause=5,
              labels=labels, view=1)
     # test_multi(dataset, plot_skeleton, lambda x: x[0].numpy().transpose(1, 0, 2, 3), labels=labels, skip=1000, edges=edge,
     #            is_3d=True, pause=0.01, view=1)

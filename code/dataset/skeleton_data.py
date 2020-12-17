@@ -7,6 +7,7 @@ import scipy.ndimage.interpolation as inter
 from scipy.signal import medfilt
 import warnings
 import math
+from dataset.rotation import *
 
 warnings.filterwarnings('ignore', '.*output shape of zoom.*')
 
@@ -180,19 +181,28 @@ def turn_two_to_one(seq):
     return new_seq
 
 
-def rot_to_fix_angle_fstframe(skeleton, jpts=[0, 1], axis=[0, 0, 1], frame=0, person=0):
+def rot_to_fix_angle_fstframe(skeleton, jpts=[0, 1], axis=[0, 0, 1], frame=0, person=0, fix_dim=None):
     '''
     :param skeleton: c t v m
     :param axis: 001 for z, 100 for x, 010 for y
     '''
     skeleton = np.transpose(skeleton, [3, 1, 2, 0])  # M, T, V, C
-    joint_bottom = skeleton[person, frame, jpts[0]]
-    joint_top = skeleton[person, frame, jpts[1]]
+    joint_bottom = skeleton[person, frame, jpts[0]].copy()
+    joint_top = skeleton[person, frame, jpts[1]].copy()
+    if fix_dim is not None:
+        joint_bottom[fix_dim] = 0
+        joint_top[fix_dim] = 0
     axis_c = np.cross(joint_top - joint_bottom, axis)
     angle = angle_between(joint_top - joint_bottom, axis)
     matrix_z = rotation_matrix(axis_c, angle)
-    tmp = np.dot(np.reshape(skeleton, (-1, 3)), matrix_z.transpose())
-    skeleton = np.reshape(tmp, skeleton.shape)
+    for i_p, person in enumerate(skeleton):
+        if person.sum() == 0:
+            continue
+        for i_f, frame in enumerate(person):
+            if frame.sum() == 0:
+                continue
+            for i_j, joint in enumerate(frame):
+                skeleton[i_p, i_f, i_j] = np.dot(matrix_z, joint)
     return skeleton.transpose((3, 1, 2, 0))
 
 

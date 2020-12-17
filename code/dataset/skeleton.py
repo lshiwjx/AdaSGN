@@ -9,7 +9,7 @@ class Skeleton(Dataset):
                  random_choose=False, center_choose=False,
                  to_volume=None, to_sparse=None, edge=None, dilate_value=0, interval=None,
                  random_crop=False, crop_range=None, rotation=None, move_range=None, scale=None, fea_augment=False,
-                 eval=False, turn2to1=False):
+                 eval=False, turn2to1=False, rot_norm=False):
         self.data_path = data_path
         self.label_path = label_path
         self.random_choose = random_choose
@@ -25,6 +25,7 @@ class Skeleton(Dataset):
         self.move_range = move_range
         self.scale = scale
         self.turn2to1 = turn2to1
+        self.rot_norm = rot_norm
         C, T, V, M = self.load_data()
         self.to_sparse = to_sparse
         self.to_volume = to_volume
@@ -85,6 +86,9 @@ class Skeleton(Dataset):
                 scale = [random.random() * (y - x) + x for x, y in self.scale]
             else:
                 scale = None
+            if self.rot_norm:
+                data_numpy = rot_to_fix_angle_fstframe(data_numpy, axis=[0, 0, 1], jpts=[0, 20])
+                data_numpy = rot_to_fix_angle_fstframe(data_numpy, axis=[1, 0, 0], jpts=[20, 5], fix_dim=2)
 
             if self.to_volume is not None:
                 data_numpy = normalize(data_numpy, [0, 1])
@@ -125,6 +129,23 @@ class Skeleton(Dataset):
                 break
             num += (data[0, :, :num_joint].sum(-1) > 0).sum().item()  # only statistic the first obj
         print(num / total_num)
+
+    def statistic_distance_variance(self, total=100):
+        from tqdm import tqdm
+        loader = DataLoader(dataset=self, batch_size=1, shuffle=False, num_workers=0)
+        all_dis = []
+        for i, (ske, label, index) in enumerate(tqdm(loader)):
+            # ske: 1ctvm
+            ske = ske.mean(0).mean(-2)[:, :, 0]
+            if i >= total:
+                break
+            C, V = ske.shape
+            dis = np.zeros([V, V])
+            for j in range(V):
+                for k in range(j, V):
+                    dis[j, k] = np.linalg.norm(ske[:, j] - ske[:, k])
+            all_dis.append(dis)
+        print(np.stack(all_dis).mean(0))
 
     def skeleton_to_sparse(self, coord_path, fea_path, num_joints, num_person):
         dilate_num = self.dilate_value * 6 if self.dilate_value != 0 else 1

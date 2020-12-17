@@ -13,10 +13,10 @@ def loss_choose(args, block):
         loss_function = torch.nn.CrossEntropyLoss(size_average=True)
     elif loss == 'label_smooth_CE':
         loss_function = LabelSmoothingLoss(args.class_num, ls_param.label_smoothing_num)
-    elif loss == 'multi_cross_entropy':
-        loss_function = multi_cross_entropy_loss()
-    elif loss == 'mse_ce':
-        loss_function = [torch.nn.MSELoss(), torch.nn.CrossEntropyLoss(size_average=True)]
+        shutil.copy2(inspect.getfile(LabelSmoothingLoss), args.model_saved_name)
+    elif loss == 'smooth_CE_FLOPS':
+        loss_function = AdaLoss(args.class_num, **ls_param)
+        shutil.copy2(inspect.getfile(AdaLoss), args.model_saved_name)
     else:
         loss_function = torch.nn.CrossEntropyLoss(size_average=True)
 

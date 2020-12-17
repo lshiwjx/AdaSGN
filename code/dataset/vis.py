@@ -190,7 +190,7 @@ def vis(function, data, pause=10., view=32., is_3d=True, title='', save_paths=No
         ax.set_title(title)
         function(ax, d, **kwargs)
         if is_3d:
-            ax.view_init(azim=60, elev=20)
+            ax.view_init(azim=-45, elev=30)
         if not show_axis:
             ax.set_axis_off()
         # fig.canvas.draw()
