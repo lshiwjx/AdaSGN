@@ -37,7 +37,7 @@ class AdaLoss(nn.Module):
         :param pred: N, num_cls
         :param target: N
         :param flops_vector: num_act
-        :param actions: num_act N 1 1 T
+        :param actions: num_act N M 1 1 T
         :return:
         """
         if epoch < self.freeze_alpha:
@@ -53,10 +53,10 @@ class AdaLoss(nn.Module):
         #                        flops_vector[self.begin_action:].unsqueeze(0)) + flops_vector[0]) * alpha
 
         ls_flops = torch.mean(
-            torch.mean(actions[self.begin_action:], dim=(2, 3, 4)).transpose(1, 0) *
+            torch.mean(actions[self.begin_action:], dim=(2, 3, 4, 5)).transpose(1, 0) *
                               flops_vector[self.begin_action:].unsqueeze(0)) * alpha
         ls_cls = self.CE(pred, target)
-        avg_action = torch.mean(actions, dim=(1, 2, 3, 4))
+        avg_action = torch.mean(actions, dim=(1, 2, 3, 4, 5))
         ls_uniform = torch.norm(avg_action - avg_action.mean(), p=2) * self.beta
         return ls_flops, ls_cls, ls_uniform
 

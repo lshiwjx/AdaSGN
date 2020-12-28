@@ -2,7 +2,6 @@ import numpy as np
 from utility.vis_env import *
 from torch.utils.data import DataLoader
 
-
 SCANNET_COLOR_MAP = {
     0: (0., 0., 0.),
     1: (174., 199., 232.),
@@ -102,7 +101,7 @@ def get_pts_from_sparse_array(coords, data, color=list(SCANNET_COLOR_MAP.values(
     return points  # T N C
 
 
-def plot_points(ax, pts, edges=None):
+def plot_points(ax, pts, edges=None, frame_ind=None):
     """
     pts: M, N, 3, 6 or 7 (last 3 or 4 is rgb or rgba)
     edge: [[0, 1], ... ]
@@ -133,20 +132,32 @@ def plot_points(ax, pts, edges=None):
         pass
 
 
-def plot_skeleton(ax, data, edges, additional_connect=None):
+def plot_skeleton(ax, data, edges, additional_connect=None, frame_ind=None):
     C, V, M = data.shape
+    if type(edges[-1][0]) is not int:
+        for edge in edges:
+            if len(edge) == V - 1:
+                edges = edge
+                break
 
+    p_type = list(SCANNET_COLOR_MAP.values())[::-1]
     is_3d = C == 3
 
-    p_type = ['b-', 'g-', 'r-', 'c-', 'm-', 'y-', 'k-', 'k-', 'k-', 'k-']
-    for m in range(M):
-        if data[:, :, m].sum() == 0:
-            continue
-        for i, (v1, v2) in enumerate(edges):
+    if len(edges) == 0:
+        for m in range(M):
             if is_3d:
-                ax.plot(data[0, [v1, v2], m], data[1, [v1, v2], m], data[2, [v1, v2], m], p_type[m])
+                ax.scatter(data[0, 0, m], data[1, 0, m], data[2, 0, m], color=[a/255 for a in p_type[m]])
             else:
-                ax.plot(data[0, [v1, v2], m], data[1, [v1, v2], m], p_type[m])
+                ax.scatter(data[0, 0, m], data[1, 0, m], color=[a/255 for a in p_type[m]])
+    else:
+        for m in range(M):
+            if abs(data[:, :, m]).sum() < 1e-5:
+                continue
+            for i, (v1, v2) in enumerate(edges):
+                if is_3d:
+                    ax.plot(data[0, [v1, v2], m], data[1, [v1, v2], m], data[2, [v1, v2], m], color=[a/255 for a in p_type[m]])
+                else:
+                    ax.plot(data[0, [v1, v2], m], data[1, [v1, v2], m], color=[a/255 for a in p_type[m]])
 
     if not additional_connect is None:
         for connection in additional_connect:
@@ -157,7 +168,7 @@ def plot_skeleton(ax, data, edges, additional_connect=None):
                     color='darkorange', alpha=s, linewidth=2)
 
 
-def plot_img(ax, data):
+def plot_img(ax, data, frame_ind=None):
     ax.imshow(data.transpose(1, 2, 0))
 
 
@@ -187,8 +198,8 @@ def vis(function, data, pause=10., view=32., is_3d=True, title='', save_paths=No
             ax.axis([view[0], view[1], view[0], view[1]])
             if is_3d:
                 ax.set_zlim3d(view[0], view[1])
-        ax.set_title(title)
-        function(ax, d, **kwargs)
+        ax.set_title(title+' '+str(i))
+        function(ax, data=d, frame_ind=i, **kwargs)
         if is_3d:
             ax.view_init(azim=-45, elev=30)
         if not show_axis:

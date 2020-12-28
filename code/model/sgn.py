@@ -2,12 +2,12 @@ from model.layers import *
 
 
 class SGN(nn.Module):
-    def __init__(self, num_classes, num_joint, seg, bias=True, dim=256):
+    def __init__(self, num_classes, num_joint, seg, bias=True, dim=256, gcn_type='big'):
         super(SGN, self).__init__()
 
         self.seg = seg
 
-        self.spa_net = SpatialNet(num_joint, bias, dim, gcn_type='mid')
+        self.spa_net = SpatialNet(num_joint, bias, dim, gcn_type=gcn_type)
         self.tem_net = TempolNet(seg, bias, dim)
 
         self.maxpool = nn.AdaptiveMaxPool2d((1, 1))

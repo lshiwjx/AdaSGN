@@ -277,6 +277,8 @@ class ADASGN(nn.Module):
         # self.gflops_vector = torch.FloatTensor([self.gflops_table['flops_fix'], *self.gflops_table['spanet'][1:]])
 
     def get_policy_usage_str(self, action_list):
+        action_list, label_list = action_list
+
         actions_mean = np.concatenate(action_list, axis=1).mean(-1).squeeze(-1).squeeze(-1).mean(-1)  # num_act
 
         gflops = actions_mean[1:] * self.gflops_table['spanet'][1:]

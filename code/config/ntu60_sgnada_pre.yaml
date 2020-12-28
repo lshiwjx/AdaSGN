@@ -7,10 +7,11 @@ data_param:
     center_choose: False
     window_size: 20
     final_size: 20
-    num_skip_frame:
+    num_skip_frame: 
     decouple_spatial: False
     rotation: [[-17, 17],[-17, 17],[-17, 17]]
     turn2to1: False
+    rot_norm: False
   val_data_param:
     data_path: ../data/ntu60/CS/test_data.npy
     label_path: ../data/ntu60/CS/test_label.pkl
@@ -18,35 +19,32 @@ data_param:
     center_choose: False
     window_size: 20
     final_size: 20
-    num_skip_frame:
+    num_skip_frame: 
     decouple_spatial: False
     eval: False
     turn2to1: False
+    rot_norm: False
 model: 'sgn_ada'
 model_param:
   seg: 20
-  num_joints: [1, 5, 9, 21, 25]
+  num_joints: [1, 9, 25]
   dim: 256
   policy_kernel: 3
   policy_dilate: 1
   gcn_types: ['small', 'big']
-  adaptive_transform: [True, True, True, True, True]
+  adaptive_transform: [True, True, True]
   policy_type: 'tconv'
   init_type: 'random'  # fix actions in init stage
   tau: 5
   tau_decay: -0.045
   tau_type: 'linear'
   pre_trains: [
-                 '../pretrain_models/single_sgn_jpt1_small.state',
-                 '../pretrain_models/single_sgn_jpt1_big.state',
-                 '../pretrain_models/single_sgn_jpt5_small.state',
-                 '../pretrain_models/single_sgn_jpt5_big.state',
-                 '../pretrain_models/single_sgn_jpt9_small.state',
-                 '../pretrain_models/single_sgn_jpt9_big.state',
-                 '../pretrain_models/single_sgn_jpt21_small.state',
-                 '../pretrain_models/single_sgn_jpt21_big.state',
-                 '../pretrain_models/single_sgn_jpt25_small.state',
-                 '../pretrain_models/single_sgn_jpt25_big.state',
+                 '../pretrain_models/ntucs/single_sgn_jpt1_small.state',
+                 '../pretrain_models/ntucs/single_sgn_jpt1_big.state',
+                 '../pretrain_models/ntucs/single_sgn_jpt9_small.state',
+                 '../pretrain_models/ntucs/single_sgn_jpt9_big.state',
+                 '../pretrain_models/ntucs/single_sgn_jpt25_small.state',
+                 '../pretrain_models/ntucs/single_sgn_jpt25_big.state',
   ]
   init_num: 100  # init temporal net and fc
 
@@ -57,9 +55,9 @@ pipeline_param:
 loss: 'smooth_CE_FLOPS'
 loss_param:
   label_smoothing_num: 0.1
-  alpha: 0
+  alpha: 4
   freeze_alpha: 0
-  warm_epoch: 5
+  warm_epoch: 0
   beta: 0
   begin_action: 1
 
@@ -85,11 +83,11 @@ worker: 32
 pin_memory: False
 max_epoch: 120
 num_epoch_per_save: 200
-model_saved_name: '../work_dir/ntu60/sgnadapre_alpha0_policyran_lineartau5_transformfix30_models10fix30_lr0001'
+model_saved_name: '../work_dir/ntu60/sgnadapre_alpha4warm0_policyran_lineartau5_transformadap_models6_lr0001'
 last_model:
 pre_trained_model:
 ignore_weights: []
 val_first: False
 device_id: [0]
-cuda_visible_device: '4'
+cuda_visible_device: '0'
 debug: False

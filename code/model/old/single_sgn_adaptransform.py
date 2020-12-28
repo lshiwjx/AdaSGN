@@ -4,6 +4,25 @@ from model.layers import *
 from model.init_transforms import Transforms
 
 
+class GetTransform(nn.Module):
+    def __init__(self, in_c, out_joint, num_frame, ori_joint=25):
+        super(GetTransform, self).__init__()
+        # self.conv = nn.Conv1d(in_c*num_frame, out_joint, kernel_size=1, padding=0)
+        self.conv = nn.Linear(in_c*num_frame*ori_joint, ori_joint*out_joint)
+        nn.init.constant_(self.conv.weight, 0)
+        nn.init.constant_(self.conv.bias, 0)
+
+
+    def forward(self, x):
+        n, c, v, t = x.shape
+        x = x.view(n, -1)
+        x = self.conv(x).view(n, v, -1)
+        # x = x.permute(0, 1, 3, 2).contiguous().view(n, c*t, v)
+        # x = self.conv(x)
+        # x = x.permute(0, 2, 1)
+        return x
+
+
 class Single_SGN(nn.Module):
     def __init__(self, num_classes, num_joint, seg, bias=True, dim=256, adaptive_transform=False, num_joint_ori=25,
                  gcn_type='mid'):
@@ -18,8 +37,7 @@ class Single_SGN(nn.Module):
         self.fc = nn.Linear(dim * 2, num_classes)
 
         self.transform = nn.Parameter(Transforms['M{}to{}'.format(num_joint_ori, num_joint)], requires_grad=adaptive_transform)
-        # self.transform = nn.Parameter(torch.ones([num_joint_ori, num_joint]) / num_joint_ori,
-        #                               requires_grad=adaptive_transform)
+        self.get_transform = GetTransform(3, num_joint, seg)
 
     def forward(self, input):
         if len(input.shape) == 6:
@@ -30,7 +48,8 @@ class Single_SGN(nn.Module):
             s = 1
         input = input.permute(0, 4, 1, 3, 2).contiguous().view(bs * m * s, c, num_joints, step)  # nctvm->nmcvt
 
-        input = torch.matmul(input.transpose(2, 3), self.transform).transpose(2, 3).contiguous()  # bcvt
+        transform = torch.repeat_interleave(self.transform+self.get_transform(input), repeats=c, dim=0)
+        input = torch.bmm(input.view(bs*m*s*c, num_joints, step).transpose(1, 2), transform).transpose(2, 1).contiguous().view(bs*m*s, c, num_joints, step)  # bcvt
 
         dif = torch.cat([torch.zeros([*input.shape[:3], 1], device=input.device), input[:, :, :, 1:] - input[:, :, :, 0:-1]], dim=-1)
 

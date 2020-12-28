@@ -1,8 +1,8 @@
 data: 'ntu_skeleton'
 data_param:
   train_data_param:
-    data_path: ../data/ntu60/CS/train_data.npy
-    label_path: ../data/ntu60/CS/train_label.pkl
+    data_path: ../data/ntu60/CV/train_data.npy
+    label_path: ../data/ntu60/CV/train_label.pkl
     random_choose: True
     center_choose: False
     window_size: 20
@@ -12,8 +12,8 @@ data_param:
     rotation: [[-17, 17],[-17, 17],[-17, 17]]
     turn2to1: False
   val_data_param:
-    data_path: ../data/ntu60/CS/test_data.npy
-    label_path: ../data/ntu60/CS/test_label.pkl
+    data_path: ../data/ntu60/CV/test_data.npy
+    label_path: ../data/ntu60/CV/test_label.pkl
     random_choose: False
     center_choose: False
     window_size: 20
@@ -30,7 +30,7 @@ model_param:
   policy_kernel: 3
   policy_dilate: 1
   gcn_types: ['small', 'big']
-  adaptive_transform: [True, True, True]
+  adaptive_transform: [False, False, False]
   policy_type: 'tconv'
   init_type: 'random'  # fix actions in init stage
   tau: 5
@@ -55,7 +55,7 @@ loss_param:
   label_smoothing_num: 0.1
   alpha: 0.6
   freeze_alpha: 0
-  warm_epoch: 5
+  warm_epoch: 0
   beta: 0
   begin_action: 1
 
@@ -64,7 +64,7 @@ lr_scheduler_param:
   step: [60, 90, 110]
   lr_decay_ratio: 0.1
   warm_up_epoch: 0
-freeze_keys: [['transforms', 120]]
+freeze_keys: []
 lr_multi_keys: []
 
 optimizer: 'adam'
@@ -80,11 +80,11 @@ worker: 32
 pin_memory: False
 max_epoch: 120
 num_epoch_per_save: 200
-model_saved_name: '../work_dir/ntu60/sgnada_alpha06warm5_policyran_lineartau5_transformfix120_models6_lr0001'
+model_saved_name: '../work_dir/ntu60cv/sgnada_alpha06warm0_policyran_lineartau5_transformfix_models6_lr0001'
 last_model:
 pre_trained_model:
 ignore_weights: []
 val_first: False
 device_id: [0]
-cuda_visible_device: '0'
+cuda_visible_device: '4'
 debug: False

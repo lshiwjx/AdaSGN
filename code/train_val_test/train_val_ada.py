@@ -44,12 +44,14 @@ def val_ada(data_loader, model, loss_function, global_step, args, writer, loger,
     loss_flops = Recorder()
     loss_cls = Recorder()
     action_list = []
+    label_list = []
     for index, (inputs, labels, names) in enumerate(process):
 
         with torch.no_grad():
             inputs, labels = inputs.cuda(non_blocking=True), labels.cuda(non_blocking=True)
             outputs, actions = model(inputs)
-            action_list.append(actions.cpu().numpy())  # num_act N 1 1 T
+            action_list.append(actions.cpu().numpy())  # num_act N M 1 1 T
+            label_list.append(labels.cpu().numpy())
             gflops_vector = model.module.gflops_vector
             ls_flops, ls_cls, ls_uniform = loss_function(outputs, labels, gflops_vector, actions, epoch)
             _, predict_label = torch.max(outputs.data, 1)
@@ -74,11 +76,12 @@ def val_ada(data_loader, model, loss_function, global_step, args, writer, loger,
                 .format(right_num / batch_num, ls_flops.item(), ls_cls.item(), ls_uniform.item()))
 
     score = np.concatenate(score_frag)
+    print_str = model.module.get_policy_usage_str(action_list, label_list)
     score_dict = dict(zip(data_loader.dataset.sample_name, score))
 
     process.close()
 
-    loger.log(model.module.get_policy_usage_str(action_list))
+    loger.log(print_str)
 
     # print('Accuracy: ', accuracy)
     if writer is not None:

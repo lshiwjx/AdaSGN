@@ -229,3 +229,21 @@ class compute_g_spa(nn.Module):
         g3 = g1.matmul(g2)
         g = self.softmax(g3)
         return g
+
+
+if __name__ == '__main__':
+    from model.flops_count import get_model_complexity_info
+    # temNet: 0.007
+    # tconv: 4e-5 2-layer 0.002
+    # transformer: 0.0019 or 2e-3
+    # lstm: 6e-5  2-layer 0.004
+    num_t = 20
+    num_j = 25
+    Big = SpatialNet(num_j)  # 0.01 0.07 0.15
+    Mid = SpatialNet(num_j)  # 0.01 0.07 0.15
+    Sma = SpatialNet(num_j)  # 0.01 0.07 0.15
+    flops1, params1 = get_model_complexity_info(Big, (3, num_j, num_t), as_strings=True)  # 0.15
+    flops2, params2 = get_model_complexity_info(Mid, (3, num_j, num_t), as_strings=True)  # 0.07
+    flops3, params3 = get_model_complexity_info(Sma, (3, num_j, num_t), as_strings=True)  # 0.01
+    print(flops1, flops2, flops3)
+    print(params1, params2, params3)

@@ -1,39 +1,7 @@
-from torch import nn
-import torch
-import math
-import torch.nn.functional as F
 import numpy as np
 from model.flops_count import get_model_complexity_info
-
-from model.init_transforms import Transforms, Transformsadap
+from model.init_transforms import Transforms
 from model.policy_layers import *
-
-
-def get_litefeat_and_action(input_feat, tau, policy_net):
-    prob = torch.log(F.softmax(policy_net(input_feat), dim=1).clamp(min=1e-8))  # batch_size num_action 1 t
-
-    action = F.gumbel_softmax(prob, tau, hard=True, dim=1)  # batch_size num_action 1 t
-
-    return prob, action
-
-
-def get_input_feats(input_list, models):
-    output_list = []
-    for input, model in zip(input_list, models):
-        dif = torch.cat(
-            [torch.zeros([*input.shape[:3], 1], device=input.device), input[:, :, :, 1:] - input[:, :, :, 0:-1]],
-            dim=-1)
-
-        output_list.append(model(input, dif))
-    return output_list
-
-
-def downsample_input(input, transforms, num_models):
-    # n c v t
-    out_list = []
-    for i, t in enumerate(transforms):
-        out_list.append(torch.matmul(input.transpose(2, 3), t).transpose(2, 3).contiguous())
-    return out_list
 
 
 class ADASGN(nn.Module):
@@ -46,9 +14,6 @@ class ADASGN(nn.Module):
         self.transforms = nn.ParameterList(
             [nn.Parameter(Transforms['M{}to{}'.format(num_joints[-1], i)], requires_grad=adaptive_transform[ind]) for
              ind, i in enumerate(num_joints) for gcn_type in gcn_types])
-        # self.transforms = nn.ParameterList(
-        #     [nn.Parameter(torch.ones([num_joint_ori, num_joint]) / num_joint_ori,
-        #                   requires_grad=adaptive_transform[ind]) for ind, num_joint in enumerate(num_joints)])
 
         self.num_joints = num_joints
         self.seg = seg
@@ -70,6 +35,7 @@ class ADASGN(nn.Module):
         self.num_gcns = len(gcn_types)
         self.num_jpt = len(num_joints)
         self.num_action = self.num_gcns * self.num_jpt
+        self.policy_type = policy_type
 
         if pre_trains is not None:
             self.load(pre_trains, init_num)
@@ -87,6 +53,8 @@ class ADASGN(nn.Module):
         elif policy_type == 'tnet':
             self.policy_net = Temconv(dim, self.num_action, k=policy_kernel, d=policy_dilate, seg=seg, dim=dim,
                                       init_type=init_type)
+        elif policy_type == 'random' or policy_type == 'fuse':
+            self.policy_net = EmptyNet()
         else:
             raise RuntimeError('No such policy net')
 
@@ -101,7 +69,7 @@ class ADASGN(nn.Module):
         def input_constructor(a):
             return {'input': torch.ones(()).new_empty((1, *a)), 'dif': torch.ones(()).new_empty((1, *a))}
 
-        self.gflops_table = {}
+        self.gflops_table = dict()
         self.gflops_table['spanet'] = [
             get_model_complexity_info(m, (3, j, self.seg), input_constructor=input_constructor, **kwards)[0] / 1e9 for
             m, j in zip(self.spa_nets, [x for x in self.num_joints for _ in self.gcn_types])]
@@ -122,17 +90,36 @@ class ADASGN(nn.Module):
         print('policy', self.gflops_table['policy'])
         print('flops_fix', self.gflops_table['flops_fix'])
 
-        # self.gflops_vector = torch.FloatTensor([self.gflops_table['flops_fix'], *self.gflops_table['spanet'][1:]])
+    def get_policy_usage_str(self, action_list, label_list):
+        """
 
-    def get_policy_usage_str(self, action_list):
-        actions_mean = np.concatenate(action_list, axis=1).mean(-1).squeeze(-1).squeeze(-1).mean(-1)  # num_act
+        :param action_list: [num_act, N, M, 1, 1, T]
+        :param label_list: [N]
+        :return:
+        """
+        action_list = np.concatenate(action_list, axis=1).mean(-1).squeeze(-1).squeeze(-1)
+        label_list = np.concatenate(label_list)
+        num_class = self.args.class_num
+        num_action = self.num_action
+        action_statistic = np.zeros([num_class, num_action])
+        for i, l in enumerate(label_list):
+            action_statistic[l] += action_list[:, i, 0]
+        action_statistic = action_statistic / (action_statistic.sum(0, keepdims=True) + 1e-6)
+        top5 = [np.concatenate([
+            np.argsort(action_statistic[:, i])[::-1][:5], np.sort(action_statistic[:, i])[::-1][:5]
+        ]) for i in range(num_action)]  # num_act, 5
+
+        action_statistic_str = ''.join('\nAction{}: {}, {}'.format(i, top5[i][:5].astype(np.int), top5[i][5:].astype(np.float16)) for i in range(num_action))
+
+        actions_mean = action_list.mean(-1).mean(-1)  # num_act
 
         gflops = actions_mean[1:] * self.gflops_table['spanet'][1:]
 
         printed_str = 'Gflops_fix: ' + str(self.gflops_table['flops_fix']) \
                       + '\nGflops: ' + str(gflops) \
                       + '\nALL: ' + str(sum(gflops) + self.gflops_table['flops_fix']) \
-                      + '\nActions: ' + str(actions_mean)
+                      + '\nActions: ' + str(actions_mean) \
+                      + action_statistic_str
         return printed_str
 
     def train(self, mode=True):
@@ -164,9 +151,16 @@ class ADASGN(nn.Module):
         # get input features s b c 1 t
         input_feats = get_input_feats(input_list, self.spa_nets)
         # batch_size num_action 1 t
-        prob, action = get_litefeat_and_action(input_feats[0], self.tau, self.policy_net)
+        if self.policy_type == 'random':
+            prob, action = get_random_action(bs * m * s, self.num_action, step)
+        elif self.policy_type == 'fuse':
+            prob, action = get_fixed_action(bs * m * s, self.num_action, step)
+        else:
+            prob, action = get_litefeat_and_action(input_feats[0], self.tau, self.policy_net)
+        # print(prob[0, :, 0])
+        # print(action[0, :, 0])
         # num_action, b11t
-        action = action.permute(1, 0, 2, 3).unsqueeze(2)
+        action = action.permute(1, 0, 2, 3).unsqueeze(2).to(input.device)
         # b c 1 t
         input = (action * torch.stack(input_feats)).sum(0)
         # b c 1 t
@@ -179,7 +173,7 @@ class ADASGN(nn.Module):
         output = self.fc(output)
         output = output.view(bs, m * s, -1).mean(1)
 
-        return output, action
+        return output, action.view(self.num_action, bs, m*s, 1, 1, step)
 
     def test(self, input):
         if len(input.shape) == 6:
@@ -188,27 +182,29 @@ class ADASGN(nn.Module):
         else:
             bs, c, step, num_joint, m = input.shape
             s = 1
-
-        input = input.permute(0, 4, 1, 3, 2).contiguous().view(bs * m * s, c, num_joint, self.seg)  # nctvm->nmcvt
-
-        input_list = downsample_input(input, self.transforms)  # get input list with different size s b c v t
+        # nctvm->nmcvt
+        input = input.permute(0, 4, 1, 3, 2).contiguous().view(bs * m * s, c, num_joint, self.seg)
+        # get input list with different size s b c v t
+        input_list = downsample_input(input, self.transforms, len(self.gcn_types))
 
         diff_list = [
             torch.cat([torch.zeros(*input.shape[:3], 1).zero_(), input[:, :, :, 1:] - input[:, :, :, 0:-1]], dim=-1) for
             input in input_list]
-
-        policy_fea = self.spa_nets[0](input_list[0], diff_list[0])  # b c 1 t
-        print(input_list[5])
-
-        prob = torch.log(F.softmax(self.policy_net(policy_fea), dim=1).clamp(min=1e-8))  # batch_size num_action 1 t
-
+        # b c 1 t
+        policy_fea = self.spa_nets[0](input_list[0], diff_list[0])
+        # batch_size num_action 1 t
+        prob = torch.log(F.softmax(self.policy_net(policy_fea), dim=1).clamp(min=1e-8))
+        # print(prob[0, :, 0])
         action = F.gumbel_softmax(prob, 1e-5, hard=True, dim=1)  # batch_size num_action 1 t
+        # print(action[0, :, 0])
         features = []
+        real_inputs = []
         for i in range(bs * m * s):
             feats = []
             for j in range(step):
                 a = action[i, :, 0, j].detach().cpu().numpy()
                 a = int(np.argmax(a))
+                real_inputs.append(input_list[a][i:i + 1, :, :, j:j + 1][0].detach().cpu().numpy())
                 if a == 0:
                     feats.append(policy_fea[i:i + 1, :, :, j:j + 1])
                 else:
@@ -217,15 +213,22 @@ class ADASGN(nn.Module):
             features.append(torch.cat(feats, dim=-1))
 
         spa_fea = torch.cat(features, dim=0)
-        print(spa_fea.shape)
-        input = self.tem_net(spa_fea)  # b c 1 t
-        # Classification
-        output = self.maxpool(input)  # b c 1 1
-        output = torch.flatten(output, 1)  # b c
-        output = self.fc(output)  # b p
+        # b c 1 t
+        input = self.tem_net(spa_fea)
+          # b c 1 1
+        output = self.maxpool(input)
+        # b c
+        output = torch.flatten(output, 1)
+        # b p
+        output = self.fc(output)
         output = output.view(bs, m * s, -1).mean(1)
 
-        return output
+        # _, predict_label = torch.max(output.data, 1)
+        # from dataset.vis import vis, plot_skeleton
+        #
+        # vis(real_inputs, plot_skeleton, view=1, title=labels[predict_label.item()])
+        print(action[0])
+        return output, real_inputs[:len(real_inputs)//2]
 
     def load_part(self, model, pretrained_dict, key):
         model_dict = model.state_dict()
@@ -254,49 +257,60 @@ if __name__ == '__main__':
     import os
     from thop import profile
 
-    num_js = [5, 9, 13, 17, 21, 25]
+    num_js = [1, 9, 25]
     num_j = num_js[-1]
     num_t = 20
     dim = 256
     os.environ['CUDA_VISIBLE_DEVICE'] = '0'
 
-    # Big = SpatialNet(5, 20)  # 0.01 0.07 0.15
-    # Mid = SpatialNet(5, 20)  # 0.01 0.07 0.15
-    # Sma = SpatialNet(5, 20)  # 0.01 0.07 0.15
-    # flops1, params1 = get_model_complexity_info(Big, (3, 5, num_t), as_strings=True)  # 0.15
-    # flops2, params2 = get_model_complexity_info(Mid, (3, 5, num_t), as_strings=True)  # 0.07
-    # flops3, params3 = get_model_complexity_info(Sma, (3, 5, num_t), as_strings=True)  # 0.01
-    # print(flops1, flops2, flops3)
-    # print(params1, params2, params3)
-
-    # temNet: 0.007
-    # tconv: 4e-5 2-layer 0.002
-    # transformer: 0.0019 or 2e-3
-    # lstm: 6e-5  2-layer 0.004
     pretrained = [
-        '../../pretrain_models/single_sgn_jpt{}.state'.format(j) for j in num_js
+        '../../pretrain_models/ntucv/single_sgn_jpt{}.state'.format(j) for j in num_js
     ]
     model = ADASGN(60, num_js, num_t,
-                   policy_type='tconv', tau=1e-5, pre_trains=None, init_type='fix', init_num=5,
-                   adaptive_transform=[True, True, True, True, True, False], gcn_types=['small', 'mid', 'big'])
+                   policy_type='tconv', tau=1e-5, pre_trains=None, init_type='random', init_num=5,
+                   adaptive_transform=[True, True, True], gcn_types=['small', 'big'])
+    pretrained_dict = torch.load('../../work_dir/ntu60cv/sgnadapre_alpha216warm5_policyran_lineartau5_transformfix30_models6fix30_lr0001_rotnorm-best.state', map_location='cpu')['model']
+    model_dict = model.state_dict()
+    pretrained_dict = {k: v for k, v in pretrained_dict.items() if k in model_dict}
+    model_dict.update(pretrained_dict)
+    model.load_state_dict(model_dict)
+    # for i, t in enumerate(model.transforms):
+    #     model.transforms[i].data = pre['transforms.{}'.format(i)]
     model.eval()
-    dummy_data = torch.randn([1, 3, num_t, num_j, 2])
+
+    # verify that the "model.test" is the same with the "model.forward"
+    # dummy_data = torch.randn([1, 3, num_t, num_j, 2])
     # o2, a2 = model(dummy_data)
     # o2.mean().backward()
-
-    # o1 = model.test(dummy_data)
-    o2, a2 = model(dummy_data)
+    # o1 = model.test(dummy_data, labels)
+    # o2, a2 = model(dummy_data)
     # print((o1 == o2).all())
-    print('finish')
-    # hooks = {}
-    # flops, params = profile(model, inputs=(dummy_data,), custom_ops=hooks)
-    # gflops = flops / 1e9
-    # params = params / 1e6
-    #
-    # print(gflops)
-    # print(params)
+    # print('finish')
 
-    # flops, params = get_model_complexity_info(model, (3, num_t, num_j, 2), as_strings=True)
+    # flops, params = get_model_complexity_info(model, (3, num_t, num_j, 1), as_strings=True)
 
     # print(flops)  # 0.16 gmac
     # print(params)  # 0.69 m
+
+    from dataset.vis import plot_skeleton, test_one, test_multi, plot_points
+    from dataset.ntu_skeleton import NTU_SKE, edge, edge1, edge9
+
+    vid = 'S004C001P003R001A058'  # ntu60
+    data_path = "../../data/ntu60/CV/test_data.npy"
+    label_path = "../../data/ntu60/CV/test_label.pkl"
+
+    kwards = {
+        "window_size": 20,
+        "final_size": 20,
+        "random_choose": False,
+        "center_choose": False,
+        "rot_norm": True
+    }
+
+    dataset = NTU_SKE(data_path, label_path, **kwards)
+    labels = open('../prepare/ntu/statistics/class_name.txt', 'r').readlines()
+
+    save_paths = ['../../vis_results/adaskeleton/{}/frame{}'.format(vid, i) for i in range(num_t)]
+    test_one(dataset, plot_skeleton, lambda x: model.test(torch.from_numpy(x).unsqueeze(0))[1], vid=vid, edges=[edge1, edge9, edge], is_3d=True, pause=0.1, labels=labels, view=1)
+    # test_multi(dataset, plot_skeleton, lambda x: model.test(x)[1], skip=1000,
+    #          edges=[edge1, edge9, edge], is_3d=True, pause=1, labels=labels, view=1)

@@ -8,9 +8,10 @@ data_param:
     window_size: 20
     final_size: 20
     num_skip_frame:
-    decouple_spatial: False
+    decouple_spatial: True
     rotation: [[-17, 17],[-17, 17],[-17, 17]]
     turn2to1: False
+    rot_norm: False
   val_data_param:
     data_path: ../data/ntu60/CS/test_data.npy
     label_path: ../data/ntu60/CS/test_label.pkl
@@ -19,15 +20,17 @@ data_param:
     window_size: 20
     final_size: 20
     num_skip_frame:
-    decouple_spatial: False
+    decouple_spatial: True
     eval: False
     turn2to1: False
+    rot_norm: False
 
 model: 'sgn'
 model_param:
   seg: 20
   num_joint: 25
   dim: 256
+  gcn_type: 'big'
 
 pipeline: 'classify'
 pipeline_param:
@@ -57,11 +60,11 @@ worker: 32
 pin_memory: False
 max_epoch: 120
 num_epoch_per_save: 200
-model_saved_name: '../work_dir/ntu60/sgn_2020_newdata_rot17___'
+model_saved_name: '../work_dir/ntu60/sgn_2020_newdata_rot17_bone'
 last_model:
 pre_trained_model:
 ignore_weights: []
 val_first: False
 device_id: [0]
-cuda_visible_device: '0'
+cuda_visible_device: '7'
 debug: False
