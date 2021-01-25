@@ -1,37 +1,35 @@
 data: 'ntu_skeleton'
 data_param:
   train_data_param:
-    data_path: ../data/ntu60/CS/train_data.npy
-    label_path: ../data/ntu60/CS/train_label.pkl
+    data_path: ../data/ntu120/CE/train_data.npy
+    label_path: ../data/ntu120/CE/train_label.pkl
     random_choose: True
     center_choose: False
     window_size: 20
     final_size: 20
-    num_skip_frame: 1
+    num_skip_frame:
     decouple_spatial: False
     rotation: [[-17, 17],[-17, 17],[-17, 17]]
     turn2to1: False
     rot_norm: False
   val_data_param:
-    data_path: ../data/ntu60/CS/test_data.npy
-    label_path: ../data/ntu60/CS/test_label.pkl
+    data_path: ../data/ntu120/CE/test_data.npy
+    label_path: ../data/ntu120/CE/test_label.pkl
     random_choose: False
     center_choose: False
     window_size: 20
     final_size: 20
-    num_skip_frame: 1
+    num_skip_frame:
     decouple_spatial: False
     eval: False
     turn2to1: False
     rot_norm: False
 
-model: 'single_sgn'
+model: 'sgn'
 model_param:
   seg: 20
   num_joint: 25
   dim: 256
-  num_joint_ori: 25
-  adaptive_transform: True
   gcn_type: 'big'
 
 pipeline: 'classify'
@@ -46,7 +44,7 @@ lr_scheduler_param:
   step: [60, 90, 110]
   lr_decay_ratio: 0.1
   warm_up_epoch: 0
-freeze_keys: [['transform', 30]]
+freeze_keys: []
 lr_multi_keys: []
 
 optimizer: 'adam'
@@ -56,17 +54,17 @@ optimizer_param:
 
 seed: 1
 eval: False
-class_num: 60
+class_num: 120
 batch_size: 64
 worker: 32
 pin_memory: False
 max_epoch: 120
-num_epoch_per_save: 50
-model_saved_name: '../work_dir/ntu60/sgnsingle25_transformfix30_valfirst_bignew_vel'
+num_epoch_per_save: 200
+model_saved_name: '../work_dir/ntu120ce/sgn_2020_newdata_rot17'
 last_model:
 pre_trained_model:
 ignore_weights: []
 val_first: False
 device_id: [0]
-cuda_visible_device: '6'
+cuda_visible_device: '1'
 debug: False

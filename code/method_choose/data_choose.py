@@ -17,12 +17,12 @@ def data_choose(args, block):
         data_set_val = NTU_SKE(**args.data_param.val_data_param)
         cf = cfv = None
         shutil.copy2(inspect.getfile(NTU_SKE), args.model_saved_name)
-    elif args.data == 'rgb':
+    elif args.data == 'shrec':
         workers = args.worker
-        data_set_train = RGB(mode='train', arg=args.data_param.train_data_param)
-        data_set_val = RGB(mode='val', arg=args.data_param.val_data_param)
+        data_set_train = SHC_SKE(**args.data_param.train_data_param)
+        data_set_val = SHC_SKE(**args.data_param.val_data_param)
         cf = cfv = None
-        shutil.copy2(inspect.getfile(RGB), args.model_saved_name)
+        shutil.copy2(inspect.getfile(SHC_SKE), args.model_saved_name)
     else:
         raise (RuntimeError('No data loader'))
 

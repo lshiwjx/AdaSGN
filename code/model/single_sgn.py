@@ -50,21 +50,22 @@ if __name__ == '__main__':
     from model.flops_count import get_model_complexity_info
     from thop import profile
 
-    num_j = 25
+    num_j_o = 22
+    num_j = 22
     num_t = 20
     os.environ['CUDA_VISIBLE_DEVICE'] = '0'
-    model = Single_SGN(60, num_j, num_t, adaptive_transform=False, gcn_type='big')
+    model = Single_SGN(60, num_j, num_t, adaptive_transform=True, gcn_type='small', num_joint_ori=num_j_o)
     # torch.save(model.state_dict(), '../../pretrain_models/single_sgn_jpt{}.state'.format(num_j),)
-    dummy_data = torch.randn([2, 3, num_t, 25, 2])
-    a = model(dummy_data)
+    dummy_data = torch.randn([1, 3, num_t, num_j_o, 1])
+    # a = model(dummy_data)
     # a.mean().backward()
 
-    # hooks = {}
-    # flops, params = profile(model, inputs=(dummy_data,), custom_ops=hooks)
-    # gflops = flops / 1e9
-    # params = params / 1e6
-    #
-    # print(gflops)
+    hooks = {}
+    flops, params = profile(model, inputs=(dummy_data,), custom_ops=hooks)
+    gflops = flops / 1e9
+    params = params / 1e6
+
+    print(gflops)
     # print(params)
 
     # flops, params = get_model_complexity_info(model, (3, num_t, 25, 1), as_strings=True)  # not support

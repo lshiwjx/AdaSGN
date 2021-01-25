@@ -8,12 +8,8 @@ edge = ((0, 1), (1, 20), (2, 20), (3, 2), (4, 20), (5, 4), (6, 5),
         (19, 18), (21, 22), (22, 7), (23, 24), (24, 11))
 interval = [10, 7, 2, 4, 5, 7, 6, 1, 5, 7, 6, 1, 2, 11, 12, 3, 2, 11, 12, 3, 1, 1, 1, 1]
 edge1 = ()
-edge5 = ((0, 1), (0, 2), (0, 3), (0, 4))
 edge9 = ((0, 1), (1, 2), (1, 3), (3, 4), (1, 5), (5, 6), (0, 7), (0, 8))
-edge25 = ((0, 1), (20, 1), (2, 20), (3, 2), (4, 20), (5, 4), (6, 5),
-        (7, 6), (8, 20), (9, 8), (10, 9), (11, 10), (12, 0),
-        (13, 12), (14, 13), (15, 14), (16, 0), (17, 16), (18, 17),
-        (19, 18), (21, 22), (22, 7), (23, 24), (24, 11))
+
 
 class NTU_SKE(Skeleton):
     def __init__(self, *args, **kwargs):
@@ -33,12 +29,12 @@ if __name__ == '__main__':
     from dataset.vis import plot_skeleton, test_one, test_multi, plot_points, get_pts_from_sparse_array, get_pts_from_volume
     from utility.vis_env import *
     # vid = 'S004C001P003R001A032'  # ntu120
-    # data_path = "/home/lshi/Database/ntu_lshipre_120/xsub/val_data_joint.npy"
-    # label_path = "/home/lshi/Database/ntu_lshipre_120/xsub/val_label.pkl"
+    # data_path = "/home/lshi/Database/ntu_60/xsub/train_data_joint.npy"  # 16487+40091
+    # label_path = "/home/lshi/Database/ntu_60/xsub/train_label.pkl"
 
     vid = 'S004C001P003R001A058'  # ntu60
-    data_path = "../../data/ntu60/CS/test_data.npy"
-    label_path = "../../data/ntu60/CS/test_label.pkl"
+    data_path = "../../data/ntu120/CS/test_data.npy"  # 63026+50919
+    label_path = "../../data/ntu120/CS/test_label.pkl"
 
     kwards = {
         "window_size": 20,
@@ -51,7 +47,7 @@ if __name__ == '__main__':
         # "to_volume": [16, 16, 16],
         # 'fea_augment': True,
         # 'eval': True
-        'rot_norm': True
+        # 'rot_norm': True
     }
 
     dataset = NTU_SKE(data_path, label_path, **kwards)

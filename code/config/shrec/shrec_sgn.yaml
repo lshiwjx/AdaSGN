@@ -1,0 +1,64 @@
+data: 'shrec'
+data_param:
+  train_data_param:
+    data_path: ../data/shrec/train_skeleton.pkl
+    label_path: ../data/shrec/train_label_14.pkl
+    random_choose: True
+    center_choose: False
+    window_size: 8
+    final_size: 8
+    num_skip_frame:
+    decouple_spatial: False
+  val_data_param:
+    data_path: ../data/shrec/val_skeleton.pkl
+    label_path: ../data/shrec/val_label_14.pkl
+    random_choose: False
+    center_choose: False
+    window_size: 8
+    final_size: 8
+    num_skip_frame:
+    decouple_spatial: False
+
+model: 'sgn'
+model_param:
+  seg: 8
+  num_joint: 22
+  dim: 256
+  gcn_type: 'big'
+
+pipeline: 'classify'
+pipeline_param:
+
+loss: 'label_smooth_CE'
+loss_param:
+  label_smoothing_num: 0.1
+
+lr_scheduler: 'reduce_by_epoch'
+lr_scheduler_param:
+  step: [60, 90, 110]
+  lr_decay_ratio: 0.1
+  warm_up_epoch: 0
+freeze_keys: []
+lr_multi_keys: []
+
+optimizer: 'adam'
+optimizer_param:
+  lr: 0.001
+  weight_decay: 0.0001
+
+seed: 1
+eval: False
+class_num: 14
+batch_size: 64
+worker: 32
+pin_memory: False
+max_epoch: 120
+num_epoch_per_save: 200
+model_saved_name: '../work_dir/shrec/sgn_88_newdata'
+last_model:
+pre_trained_model:
+ignore_weights: []
+val_first: False
+device_id: [0]
+cuda_visible_device: '0'
+debug: False

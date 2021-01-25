@@ -228,7 +228,7 @@ class compute_g_spa(nn.Module):
         g2 = self.g2(x1).permute(0, 3, 1, 2).contiguous()
         g3 = g1.matmul(g2)
         g = self.softmax(g3)
-        return g
+        return g  # ntvv
 
 
 if __name__ == '__main__':

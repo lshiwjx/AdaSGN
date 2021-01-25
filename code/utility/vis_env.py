@@ -1,6 +1,6 @@
 import os
 
-os.environ['DISPLAY'] = 'localhost:11.0'
+os.environ['DISPLAY'] = 'localhost:10.0'
 import matplotlib
 
 matplotlib.use('Qt5Agg')
