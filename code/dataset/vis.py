@@ -172,7 +172,7 @@ def plot_img(ax, data, frame_ind=None):
     ax.imshow(data.transpose(1, 2, 0))
 
 
-def vis(function, data, pause=10., view=32., is_3d=True, title='', save_paths=None, show_axis=True, **kwargs):
+def vis(function, data, pause=10., view=32., is_3d=True, title='', save_paths=None, show_axis=True, angle=[-45, 30], **kwargs):
     """
 
     :param function:
@@ -201,7 +201,7 @@ def vis(function, data, pause=10., view=32., is_3d=True, title='', save_paths=No
         ax.set_title(title+' '+str(i))
         function(ax, data=d, frame_ind=i, **kwargs)
         if is_3d:
-            ax.view_init(azim=-45, elev=30)
+            ax.view_init(azim=angle[0], elev=angle[1])
         if not show_axis:
             ax.set_axis_off()
         # fig.canvas.draw()

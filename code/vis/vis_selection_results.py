@@ -30,9 +30,9 @@ if __name__ == '__main__':
     from dataset.vis import plot_skeleton, test_one, test_multi, plot_points
     from dataset.ntu_skeleton import NTU_SKE, edge, edge1, edge9
 
-    # vid = 'S004C001P003R001A059'  # 9 walking towards each other 两个人的不太好
+    vid = 'S001C001P003R001A032'  # 9 walking towards each other 两个人的不太好
     # vid = 'S004C001P003R001A008'  # 9 sitting down
-    vid = 'S004C001P003R001A004'  # 25 brushing hair
+    # vid = 'S004C001P003R001A004'  # 25 brushing hair
     # vid = 'S004C001P003R001A043'  # 43 falling
     # vid = 'S004C001P003R001A038'  # falling
     data_path = "../../data/ntu60/CS/test_data.npy"
@@ -51,6 +51,6 @@ if __name__ == '__main__':
 
     save_paths = ['../../vis_results/adaskeleton/{}/frame{}.png'.format(vid, i) for i in range(num_t)]
     test_one(dataset, plot_skeleton, lambda x: model.test(torch.from_numpy(x).unsqueeze(0))[1], vid=vid,
-             edges=[edge1, edge9, edge], is_3d=True, pause=0.1, labels=labels, view=[-0.7, 0.5], show_axis=True, save_paths=save_paths)
+             edges=[edge1, edge9, edge], is_3d=True, pause=0.9, labels=labels, view=[-1, 1], show_axis=True, save_paths=save_paths)
     # test_multi(dataset, plot_skeleton, lambda x: model.test(x)[1], skip=1000,
     #            edges=[edge1, edge9, edge], is_3d=True, pause=1, labels=labels, view=1)

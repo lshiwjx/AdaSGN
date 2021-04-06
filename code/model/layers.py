@@ -61,7 +61,7 @@ class SpatialNet(nn.Module):
     def __init__(self, num_joint, bias=True, dim=256, gcn_type='small'):
         super().__init__()
 
-        spa = one_hot(num_joint)
+        spa = one_hot(num_joint)  # 1, 1, 25, 25
         spa = spa.permute(0, 3, 2, 1)
         self.register_buffer('spa', spa)
 

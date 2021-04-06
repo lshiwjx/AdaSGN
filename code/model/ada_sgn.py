@@ -228,7 +228,7 @@ class ADASGN(nn.Module):
         #
         # vis(real_inputs, plot_skeleton, view=1, title=labels[predict_label.item()])
         print(action[0])
-        return output, real_inputs[:len(real_inputs)//2]
+        return output, real_inputs[:len(real_inputs)//m]
 
     def load_part(self, model, pretrained_dict, key):
         model_dict = model.state_dict()

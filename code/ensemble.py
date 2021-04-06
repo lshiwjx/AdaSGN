@@ -25,7 +25,6 @@ parser = argparse.ArgumentParser()
 # parser.add_argument('--temporal_fast', default='../work_dir/ntu60cv/sgnadapre_alpha06warm5_policyran_lineartau5_transformfix30_models6fix30_lr0001_rotnorm_bone')
 # parser.add_argument('--other', default='../work_dir/ntu60cv/sgnadapre_alpha06warm5_policyran_lineartau5_transformfix30_models6fix30_lr0001_rotnorm_bone') #
 # parser.add_argument('--alpha', default=[3, 1, 1, 0, 0], help='weighted summation')
-# arg = parser.parse_args()
 
 
 # parser.add_argument('--label', default='../data/shrec/val_label_14.pkl', help='')
@@ -38,16 +37,38 @@ parser = argparse.ArgumentParser()
 # parser.add_argument('--temporal_fast', default='../work_dir/shrec/sgn_2020_newdata_vel')
 # parser.add_argument('--other', default='../work_dir/shrec/sgn_2020_newdata_vel') #
 
-parser.add_argument('--label', default='../data/shrec/val_label_28.pkl', help='')
-parser.add_argument('--joint', default='../work_dir/shrec28/sgnadapre_alpha4warm5_policyran_lineartau5_transformfix30_models6fix30_lr0001')
-parser.add_argument('--bone', default='../work_dir/shrec28/sgnadapre_alpha4warm5_policyran_lineartau5_transformfix30_models6fix30_lr0001_bone')
-parser.add_argument('--vel', default='../work_dir/shrec28/sgnadapre_alpha4warm5_policyran_lineartau5_transformfix30_models6fix30_lr0001_vel')
+# parser.add_argument('--label', default='../data/shrec/val_label_28.pkl', help='')
+# parser.add_argument('--joint', default='../work_dir/shrec28/sgnadapre_alpha4warm5_policyran_lineartau5_transformfix30_models6fix30_lr0001')
+# parser.add_argument('--bone', default='../work_dir/shrec28/sgnadapre_alpha4warm5_policyran_lineartau5_transformfix30_models6fix30_lr0001_bone')
+# parser.add_argument('--vel', default='../work_dir/shrec28/sgnadapre_alpha4warm5_policyran_lineartau5_transformfix30_models6fix30_lr0001_vel')
 # parser.add_argument('--joint', default='../work_dir/shrec28/sgn_2020_newdata')
 # parser.add_argument('--bone', default='../work_dir/shrec28/sgn_2020_newdata_bone')
 # parser.add_argument('--vel', default='../work_dir/shrec28/sgn_2020_newdata_vel')
-parser.add_argument('--temporal_fast', default='../work_dir/shrec28/sgn_2020_newdata_vel')
-parser.add_argument('--other', default='../work_dir/shrec28/sgn_2020_newdata_vel') #
-parser.add_argument('--alpha', default=[2, 1, 1, 0, 0], help='weighted summation')
+# parser.add_argument('--temporal_fast', default='../work_dir/shrec28/sgn_2020_newdata_vel')
+# parser.add_argument('--other', default='../work_dir/shrec28/sgn_2020_newdata_vel') #
+# parser.add_argument('--alpha', default=[2, 1, 1, 0, 0], help='weighted summation')
+
+# parser.add_argument('--label', default='/home/lshi/Project/Pytorch/EfficientVideoNet/data/ntu120/CS/test_label.pkl', help='')
+# parser.add_argument('--joint', default='../work_dir/ntu120/sgnadapre_alpha4warm5_policyran_lineartau5_transformfix30_models3fix30_lr0001')
+# parser.add_argument('--bone', default='../work_dir/ntu120/sgnadapre_alpha4warm5_policyran_lineartau5_transformfix30_models3fix30_lr0001_bone')
+# parser.add_argument('--vel', default='../work_dir/ntu120/sgnadapre_alpha4warm5_policyran_lineartau5_transformfix30_models3fix30_lr0001_vel')
+# # parser.add_argument('--joint', default='../work_dir/ntu120/sgn_2020_newdata_rot17')
+# # parser.add_argument('--bone', default='../work_dir/ntu120/sgn_2020_newdata_rot17_bone')
+# # parser.add_argument('--vel', default='../work_dir/ntu120/sgn_2020_newdata_rot17_vel')
+# parser.add_argument('--temporal_fast', default='../work_dir/ntu120/sgn_2020_newdata_rot17_vel')
+# parser.add_argument('--other', default='../work_dir/ntu120/sgn_2020_newdata_rot17_vel')
+# parser.add_argument('--alpha', default=[3, 3, 1, 0, 0], help='weighted summation')
+
+parser.add_argument('--label', default='/home/lshi/Project/Pytorch/EfficientVideoNet/data/ntu120/CE/test_label.pkl', help='')
+# parser.add_argument('--joint', default='../work_dir/ntu120ce/sgnadapre_alpha4warm5_policyfix_lineartau5_transformfix30_models6fix30_lr0001')
+# parser.add_argument('--bone', default='../work_dir/ntu120ce/sgnadapre_alpha4warm5_policyfix_lineartau5_transformfix30_models6fix30_lr0001_bone')
+# parser.add_argument('--vel', default='../work_dir/ntu120ce/sgnadapre_alpha4warm5_policyfix_lineartau5_transformfix30_models6fix30_lr0001_vel')
+parser.add_argument('--joint', default='../work_dir/ntu120ce/sgn_2020_newdata_rot17')
+parser.add_argument('--bone', default='../work_dir/ntu120ce/sgn_2020_newdata_rot17_bone')
+parser.add_argument('--vel', default='../work_dir/ntu120ce/sgn_2020_newdata_rot17_vel')
+parser.add_argument('--temporal_fast', default='../work_dir/ntu120ce/sgn_2020_newdata_rot17')
+parser.add_argument('--other', default='../work_dir/ntu120ce/sgn_2020_newdata_rot17')
+parser.add_argument('--alpha', default=[3, 3, 1, 0, 0], help='weighted summation')
 arg = parser.parse_args()
 
 label = open(arg.label, 'rb')
