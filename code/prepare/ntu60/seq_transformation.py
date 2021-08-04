@@ -1,11 +1,8 @@
-# Copyright (c) Microsoft Corporation. All rights reserved.
-# Licensed under the MIT License.
 import os
 import os.path as osp
 import numpy as np
 import pickle
 import logging
-import h5py
 from sklearn.model_selection import train_test_split
 
 root_path = './'
@@ -26,7 +23,6 @@ save_path = '../../../data/ntu60/'
 
 if not osp.exists(save_path):
     os.mkdir(save_path)
-
 
 def remove_nan_frames(ske_name, ske_joints, nan_logger):
     num_frames = ske_joints.shape[0]
