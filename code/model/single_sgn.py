@@ -48,7 +48,6 @@ class Single_SGN(nn.Module):
 if __name__ == '__main__':
     import os
     from model.flops_count import get_model_complexity_info
-    from thop import profile
 
     num_j_o = 25
     num_j = 25

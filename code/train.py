@@ -2,7 +2,7 @@ import os
 import time
 import torch
 import setproctitle
-from tensorboardX import SummaryWriter
+from torch.utils.tensorboard import SummaryWriter
 from tqdm import tqdm
 from method_choose.data_choose import data_choose
 from method_choose.loss_choose import loss_choose

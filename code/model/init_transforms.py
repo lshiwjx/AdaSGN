@@ -1,25 +1,5 @@
 import torch
 
-Transformsadap = {
-    'M25to25': torch.eye(25, dtype=torch.float32),
-    # 'M25to25': torch.ones([25, 25]) / 25,
-    'M25to23': torch.ones([25, 23]) / 25,
-    'M25to21': torch.ones([25, 21]) / 25,
-    'M25to20': torch.ones([25, 20]) / 25,
-    'M25to19': torch.ones([25, 19]) / 25,
-    'M25to17': torch.ones([25, 17]) / 25,
-    'M25to15': torch.ones([25, 15]) / 25,
-    'M25to13': torch.ones([25, 13]) / 25,
-    'M25to11': torch.ones([25, 11]) / 25,
-    'M25to10': torch.ones([25, 10]) / 25,
-    'M25to9': torch.ones([25, 9]) / 25,
-    'M25to7': torch.ones([25, 7]) / 25,
-    'M25to5': torch.ones([25, 5]) / 25,
-    'M25to3': torch.ones([25, 3]) / 25,
-    'M25to2': torch.ones([25, 2]) / 25,
-    'M25to1': torch.ones([25, 1]) / 25
-}
-
 Transforms = {
     # 'M25to17': torch.ones([25, 17]) / 17,
     # 'M25to5': torch.ones([25, 5]) / 5,
@@ -253,7 +233,6 @@ Transforms = {
     'M25to25': torch.eye(25, dtype=torch.float32),
     'M22to22': torch.eye(22, dtype=torch.float32),
     'M22to1': torch.ones([22, 1]) / 22,
-
     'M22to11': torch.FloatTensor([[0.5, 0., 0., 0., 0., 0., 0., 0., 0., 0., 0.],
                                   [0.5, 0., 0., 0., 0., 0., 0., 0., 0., 0., 0.],
                                   [0., 0.5, 0., 0., 0., 0., 0., 0., 0., 0., 0.],

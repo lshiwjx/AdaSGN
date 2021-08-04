@@ -109,8 +109,8 @@ def read_skeleton(ske_txt):
 
 
 def gendata():
-    root = '../data/raw/shrec_hand/'
-    save_path = '../data/shrec_hand'
+    root = '../../../data/raw/shrec_hand/'
+    save_path = '../../../data/shrec_hand'
     train_split = open(os.path.join(root, 'train_gestures.txt'), 'r').readlines()
     val_split = open(os.path.join(root, 'test_gestures.txt'), 'r').readlines()
 

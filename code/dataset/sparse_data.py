@@ -2,7 +2,6 @@ import random
 from dataset.rotation import *
 from math import cos as cos
 from math import sin as sin
-# import MinkowskiEngine as ME
 from sklearn.preprocessing import MinMaxScaler
 from tqdm import tqdm
 from numpy.lib.format import open_memmap

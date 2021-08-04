@@ -255,7 +255,7 @@ class ADASGN(nn.Module):
 
 if __name__ == '__main__':
     import os
-    from thop import profile
+    from model.flops_count import get_model_complexity_info
 
     num_js = [1, 9, 25]
     num_j = num_js[-1]

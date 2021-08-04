@@ -134,7 +134,7 @@ def get_raw_skes_data():
 if __name__ == '__main__':
     save_path = './'
 
-    skes_path = '../data/raw/ntu120/nturgb+d_skeletons/'
+    skes_path = '../../../data/raw/ntu120/nturgb+d_skeletons/'
     stat_path = osp.join(save_path, 'statistics')
     if not osp.exists('./raw_data'):
         os.makedirs('./raw_data')
