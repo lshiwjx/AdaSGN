@@ -27,7 +27,7 @@ data_param:
 model: 'sgn_ada'
 model_param:
   seg: 20
-  num_joints: [2, 9, 25]
+  num_joints: [1, 9, 25]
   dim: 256
   policy_kernel: 3
   policy_dilate: 1
@@ -39,8 +39,8 @@ model_param:
   tau_decay: -0.045
   tau_type: 'linear'
   pre_trains: [
-                 '../pretrain_models/ntucs/single_sgn_jpt2_small.state',
-                 '../pretrain_models/ntucs/single_sgn_jpt2_big.state',
+                 '../pretrain_models/ntucs/single_sgn_jpt1_small.state',
+                 '../pretrain_models/ntucs/single_sgn_jpt1_big.state',
                  '../pretrain_models/ntucs/single_sgn_jpt9_small.state',
                  '../pretrain_models/ntucs/single_sgn_jpt9_big.state',
                  '../pretrain_models/ntucs/single_sgn_jpt25_small.state',
@@ -55,7 +55,7 @@ pipeline_param:
 loss: 'smooth_CE_FLOPS'
 loss_param:
   label_smoothing_num: 0.1
-  alpha: 2
+  alpha: 4
   freeze_alpha: 0
   warm_epoch: 5
   beta: 0
@@ -83,11 +83,11 @@ worker: 32
 pin_memory: False
 max_epoch: 120
 num_epoch_per_save: 200
-model_saved_name: '../work_dir/ntu60/sgnadapre_alpha2warm5_policyran_lineartau5_transformfix30_models6fix30_lr0001_j2'
+model_saved_name: '../work_dir/ntu60/sgnadapre_alpha4warm5_policyran_lineartau5_transformfix30_models6fix30_lr0001'
 last_model:
 pre_trained_model:
 ignore_weights: []
 val_first: False
 device_id: [0]
-cuda_visible_device: '7'
+cuda_visible_device: '0'
 debug: False

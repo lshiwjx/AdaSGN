@@ -2,7 +2,7 @@ data: 'shrec'
 data_param:
   train_data_param:
     data_path: ../data/shrec/train_skeleton.pkl
-    label_path: ../data/shrec/train_label_28.pkl
+    label_path: ../data/shrec/train_label_14.pkl
     random_choose: True
     center_choose: False
     window_size: 20
@@ -11,7 +11,7 @@ data_param:
     decouple_spatial: False
   val_data_param:
     data_path: ../data/shrec/val_skeleton.pkl
-    label_path: ../data/shrec/val_label_28.pkl
+    label_path: ../data/shrec/val_label_14.pkl
     random_choose: False
     center_choose: False
     window_size: 20
@@ -33,14 +33,6 @@ model_param:
   tau: 5
   tau_decay: -0.045
   tau_type: 'linear'
-  pre_trains: [
-                 '../pretrain_models/shrec28/single_sgn_jpt1_small_bone.state',
-                 '../pretrain_models/shrec28/single_sgn_jpt1_big_bone.state',
-                 '../pretrain_models/shrec28/single_sgn_jpt11_small_bone.state',
-                 '../pretrain_models/shrec28/single_sgn_jpt11_big_bone.state',
-                 '../pretrain_models/shrec28/single_sgn_jpt22_small_bone.state',
-                 '../pretrain_models/shrec28/single_sgn_jpt22_big_bone.state',
-  ]
   init_num: 100  # init temporal net and fc
 
 
@@ -50,7 +42,7 @@ pipeline_param:
 loss: 'smooth_CE_FLOPS'
 loss_param:
   label_smoothing_num: 0.1
-  alpha: 4
+  alpha: 1
   freeze_alpha: 0
   warm_epoch: 5
   beta: 0
@@ -71,15 +63,15 @@ optimizer_param:
 #  momentum: 0.9
 
 seed: 1
-eval: False
-class_num: 28
+eval: True
+class_num: 14
 batch_size: 64
-worker: 32
+worker: 0
 pin_memory: False
 max_epoch: 120
 num_epoch_per_save: 200
-model_saved_name: '../work_dir/shrec28/sgnadapre_alpha4warm5_policyran_lineartau5_transformfix30_models6fix30_lr0001'
-last_model:
+model_saved_name: '../work_dir/val/shrec14/sgnadapre_alpha1warm5_policyran_lineartau5_transformfix30_models6fix30_lr0001'
+last_model: '../work_dir/shrec/sgnadapre_alpha1warm5_policyran_lineartau5_transformfix30_models6fix30_lr0001-best.state'
 pre_trained_model:
 ignore_weights: []
 val_first: False

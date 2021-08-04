@@ -2,7 +2,7 @@ data: 'shrec'
 data_param:
   train_data_param:
     data_path: ../data/shrec/train_skeleton.pkl
-    label_path: ../data/shrec/train_label_28.pkl
+    label_path: ../data/shrec/train_label_14.pkl
     random_choose: True
     center_choose: False
     window_size: 20
@@ -11,7 +11,7 @@ data_param:
     decouple_spatial: False
   val_data_param:
     data_path: ../data/shrec/val_skeleton.pkl
-    label_path: ../data/shrec/val_label_28.pkl
+    label_path: ../data/shrec/val_label_14.pkl
     random_choose: False
     center_choose: False
     window_size: 20
@@ -56,11 +56,11 @@ worker: 32
 pin_memory: False
 max_epoch: 120
 num_epoch_per_save: 200
-model_saved_name: '../work_dir/shrec28/sgnsingle22_transformfix30_big'
+model_saved_name: '../work_dir/shrec14/sgnsingle22_transformfix30_big'
 last_model:
 pre_trained_model:
 ignore_weights: []
 val_first: False
 device_id: [0]
-cuda_visible_device: '6'
+cuda_visible_device: '0'
 debug: False

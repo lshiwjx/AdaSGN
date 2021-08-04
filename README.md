@@ -1,56 +1,46 @@
-# DSTA-Net
-Decoupled Spatial-Temporal Attention Network for Skeleton-Based Action-Gesture Recognition in ACCV2020
+# AdaSGN
+AdaSGN: Adapting Joint Number and Model Size for Efficient Skeleton-Based Action Recognition
 
 # Note
-
+    pytorch==1.6
 
 # Data Preparation
+Under the "code" forder: 
 
- - SHREC/DHG
-    - Download the SHREC data from http://www-rech.telecom-lille.fr/shrec2017-hand/
-    - Generate the train/test splits with `python prepare/shrec/gendata.py`
- - DHG
-    - Download the DHG data from the http://www-rech.telecom-lille.fr/DHGdataset/
-    - Generate the train/test splits with `python prepare/dhg/gendata.py`
  - NTU-60
-    - Download the NTU-60 data from the https://github.com/shahroudy/NTURGB-D
-    - Generate the train/test splits with `python prepare/ntu_60/gendata.py`
+    - Download the NTU-60 data from the https://github.com/shahroudy/NTURGB-D to `../data/raw/ntu60`
+    - Process the raw data sequentially with `python prepare/ntu60/get_raw_skes_data.py`, `python prepare/ntu60/get_raw_denoised_data.py` and `python prepare/ntu60/seq_transformation.py`
  - NTU-120
-    - Download the NTU-120 data from the https://github.com/shahroudy/NTURGB-D
-    - Generate the train/test splits with `python prepare/ntu_120/gendata.py`
- - Note
-    - You can check the raw/generated skeletons through the function `view_raw/generated_skeletons_and_images()` for NTU and function `ske_vis()` for dhg/shrec in gendata.py
-     
+    - Download the NTU-120 data from the https://github.com/shahroudy/NTURGB-D to `../data/raw/ntu120`
+    - Process the raw data sequentially with `python prepare/ntu120/get_raw_skes_data.py`, `python prepare/ntu120/get_raw_denoised_data.py` and `python prepare/ntu120/seq_transformation.py`
+ - SHREC
+    - Download the SHREC data from http://www-rech.telecom-lille.fr/shrec2017-hand/ to `../data/raw/shrec_hand`
+    - Generate the train/test splits with `python prepare/shrec/gendata.py`     
+    
 # Training & Testing
 
-Change the config file depending on what you want.
+First, pre-train the single-models by:
 
-    `python train_val_test/train.py --config ./config/shrec/shrec_dstanet_14.yaml`
+    `python train.py --config ./config/ntu60/ntu60_singlesgn.yaml`
+Modify the "gcn_type" and the "num_joint" of the config file to obtain different single-models. 
+
+Second, modify the single model paths ("pre_trains" option) in the config file and train the AdaSGN by:
+
+    `python train.py --config ./config/ntu60/ntu60_ada_pre.yaml`
     
-To ensemble the results of joints and bones, run test firstly to generate the scores of the softmax layer. 
+Repeat the above two steps to train the bone modality and the velocity modality. In detail, set "decouple_spatial" to True for the bone modality and set "num_skip_frame" to 1 for the velocity modality. Then combine the generated scores with: 
 
-    `python train_val_test/eval.py --config ./config/val/shrec_dstanet_14.yaml`
-
-Then combine the generated scores with: 
-
-    `python train_val_test/train.py --datasets ntu/xview`
+    `python ensemble.py --label label_path --joint joint_score_path --bone bone_score_path --vel vel_score_path`
      
 # Citation
 Please cite the following paper if you use this repository in your reseach.
 
-    @inproceedings{2sagcn2019cvpr,  
-          title     = {Two-Stream Adaptive Graph Convolutional Networks for Skeleton-Based Action Recognition},  
+    @inproceedings{adasgn2021arxiv,  
+          title     = {AdaSGN: Adapting Joint Number and Model Size for Efficient Skeleton-Based Action Recognition},  
           author    = {Lei Shi and Yifan Zhang and Jian Cheng and Hanqing Lu},  
-          booktitle = {CVPR},  
-          year      = {2019},  
+          booktitle = {ArXiv:2103.11770 [cs.CV]},  
+          year      = {2021},  
     }
     
-    @article{shi_skeleton-based_2019,
-        title = {Skeleton-{Based} {Action} {Recognition} with {Multi}-{Stream} {Adaptive} {Graph} {Convolutional} {Networks}},
-        journal = {arXiv:1912.06971 [cs]},
-        author = {Shi, Lei and Zhang, Yifan and Cheng, Jian and LU, Hanqing},
-        month = dec,
-        year = {2019},
-	}
 # Contact
 For any questions, feel free to contact: `lei.shi@nlpr.ia.ac.cn`

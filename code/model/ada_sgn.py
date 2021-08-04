@@ -287,10 +287,10 @@ if __name__ == '__main__':
     # print((o1 == o2).all())
     # print('finish')
 
-    # flops, params = get_model_complexity_info(model, (3, num_t, num_j, 1), as_strings=True)
+    flops, params = get_model_complexity_info(model, (3, num_t, num_j, 1), as_strings=True)
 
-    # print(flops)  # 0.16 gmac
-    # print(params)  # 0.69 m
+    print(flops)  # 0.322 gmac
+    print(params)  # 1.76 m
 
     from dataset.vis import plot_skeleton, test_one, test_multi, plot_points
     from dataset.ntu_skeleton import NTU_SKE, edge, edge1, edge9

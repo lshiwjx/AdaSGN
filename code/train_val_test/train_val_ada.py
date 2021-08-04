@@ -38,6 +38,8 @@ def train_ada(data_loader, model, loss_function, optimizer, global_step, args, w
 def val_ada(data_loader, model, loss_function, global_step, args, writer, loger, epoch=None):
     process = tqdm(IteratorTimer(data_loader), desc='Val: ')
     score_frag = []
+    numj_per_action = [[] for i in range(args.class_num)]
+    numjs = np.array([1, 1, 11, 11, 22, 22])
     all_pre_true = []
     wrong_path_pre_ture = []
     acces = Recorder()
@@ -64,6 +66,10 @@ def val_ada(data_loader, model, loss_function, global_step, args, writer, loger,
             if x != true[i]:
                 wrong_path_pre_ture.append(str(names[i]) + ',' + str(x) + ',' + str(true[i]) + '\n')
 
+        for i in range(actions.shape[1]):
+            a = actions[:, i, 0, 0, 0].mean(-1).cpu().numpy()
+            numj_per_action[true[i]].append(a)
+
         right_num = torch.sum(predict_label == labels.data).item()
         batch_num = labels.data.size(0)
 
@@ -78,6 +84,9 @@ def val_ada(data_loader, model, loss_function, global_step, args, writer, loger,
     score = np.concatenate(score_frag)
     print_str = model.module.get_policy_usage_str(action_list, label_list)
     score_dict = dict(zip(data_loader.dataset.sample_name, score))
+
+    for i, l in enumerate(numj_per_action):
+        numj_per_action[i] = sum(sum(l)/len(l)*numjs)
 
     process.close()
 
