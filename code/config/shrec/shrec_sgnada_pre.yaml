@@ -78,7 +78,7 @@ worker: 32
 pin_memory: False
 max_epoch: 120
 num_epoch_per_save: 200
-model_saved_name: '../work_dir/shrec28/sgnadapre_alpha4warm5_policyran_lineartau5_transformfix30_models6fix30_lr0001'
+model_saved_name: '../work_dir/shrec28/sgnadapre'
 last_model:
 pre_trained_model:
 ignore_weights: []

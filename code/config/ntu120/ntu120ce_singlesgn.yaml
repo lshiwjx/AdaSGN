@@ -8,7 +8,7 @@ data_param:
     window_size: 20
     final_size: 20
     num_skip_frame:
-    decouple_spatial: True
+    decouple_spatial: False
     rotation: [[-17, 17],[-17, 17],[-17, 17]]
     turn2to1: False
     rot_norm: False
@@ -20,7 +20,7 @@ data_param:
     window_size: 20
     final_size: 20
     num_skip_frame:
-    decouple_spatial: True
+    decouple_spatial: False
     eval: False
     turn2to1: False
     rot_norm: False
@@ -62,7 +62,7 @@ worker: 32
 pin_memory: False
 max_epoch: 120
 num_epoch_per_save: 50
-model_saved_name: '../work_dir/ntu120ce/sgnsingle25_transformfix30_bignew_bone'
+model_saved_name: '../work_dir/ntu120ce/single_sgn_jpt1_small'
 last_model:
 pre_trained_model:
 ignore_weights: []

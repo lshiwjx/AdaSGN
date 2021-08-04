@@ -62,7 +62,7 @@ worker: 32
 pin_memory: False
 max_epoch: 120
 num_epoch_per_save: 50
-model_saved_name: '../work_dir/ntu120/sgnsingle1_transformfix30_small'
+model_saved_name: '../work_dir/ntu120/single_sgn_jpt1_small'
 last_model:
 pre_trained_model:
 ignore_weights: []

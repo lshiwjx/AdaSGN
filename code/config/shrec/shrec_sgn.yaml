@@ -2,26 +2,26 @@ data: 'shrec'
 data_param:
   train_data_param:
     data_path: ../data/shrec/train_skeleton.pkl
-    label_path: ../data/shrec/train_label_14.pkl
+    label_path: ../data/shrec/train_label_28.pkl
     random_choose: True
     center_choose: False
-    window_size: 8
-    final_size: 8
+    window_size: 20
+    final_size: 20
     num_skip_frame:
     decouple_spatial: False
   val_data_param:
     data_path: ../data/shrec/val_skeleton.pkl
-    label_path: ../data/shrec/val_label_14.pkl
+    label_path: ../data/shrec/val_label_28.pkl
     random_choose: False
     center_choose: False
-    window_size: 8
-    final_size: 8
+    window_size: 20
+    final_size: 20
     num_skip_frame:
     decouple_spatial: False
 
 model: 'sgn'
 model_param:
-  seg: 8
+  seg: 20
   num_joint: 22
   dim: 256
   gcn_type: 'big'
@@ -48,13 +48,13 @@ optimizer_param:
 
 seed: 1
 eval: False
-class_num: 14
+class_num: 28
 batch_size: 64
 worker: 32
 pin_memory: False
 max_epoch: 120
 num_epoch_per_save: 200
-model_saved_name: '../work_dir/shrec/sgn_88_newdata'
+model_saved_name: '../work_dir/shrec28/sgn'
 last_model:
 pre_trained_model:
 ignore_weights: []

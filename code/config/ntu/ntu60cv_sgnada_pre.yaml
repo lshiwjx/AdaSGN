@@ -7,7 +7,7 @@ data_param:
     center_choose: False
     window_size: 20
     final_size: 20
-    num_skip_frame: 1
+    num_skip_frame:
     decouple_spatial: False
     rotation: [[-17, 17],[-17, 17],[-17, 17]]
     turn2to1: False
@@ -19,7 +19,7 @@ data_param:
     center_choose: False
     window_size: 20
     final_size: 20
-    num_skip_frame: 1
+    num_skip_frame:
     decouple_spatial: False
     eval: False
     turn2to1: False
@@ -83,11 +83,11 @@ worker: 32
 pin_memory: False
 max_epoch: 120
 num_epoch_per_save: 200
-model_saved_name: '../work_dir/ntu60cv/sgnadapre_alpha4warm0_policyran_lineartau5_transformadap_models6_lr0001_rotnorm_vel'
+model_saved_name: '../work_dir/ntu60cv/sgnadapre'
 last_model:
 pre_trained_model:
 ignore_weights: []
 val_first: False
 device_id: [0]
-cuda_visible_device: '2'
+cuda_visible_device: '0'
 debug: False

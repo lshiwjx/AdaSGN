@@ -8,7 +8,7 @@ data_param:
     window_size: 20
     final_size: 20
     num_skip_frame:
-    decouple_spatial: True
+    decouple_spatial: False
     rotation: [[-17, 17],[-17, 17],[-17, 17]]
     turn2to1: False
     rot_norm: False
@@ -20,7 +20,7 @@ data_param:
     window_size: 20
     final_size: 20
     num_skip_frame:
-    decouple_spatial: True
+    decouple_spatial: False
     eval: False
     turn2to1: False
     rot_norm: False
