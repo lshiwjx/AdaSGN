@@ -17,7 +17,7 @@ if __name__ == '__main__':
                    policy_type='tconv', tau=1e-5, pre_trains=None, init_type='random', init_num=5,
                    adaptive_transform=[True, True, True], gcn_types=['small', 'big'])
     pretrained_dict = torch.load(
-        '../../work_dir/ntu60/sgnadapre_alpha4warm5_policyran_lineartau5_transformfix30_models6fix30_lr0001-best.state',
+        '../../work_dir/ntu60/sgnadapre-best.state',
         map_location='cpu')['model']
     model_dict = model.state_dict()
     pretrained_dict = {k: v for k, v in pretrained_dict.items() if k in model_dict}
@@ -30,11 +30,7 @@ if __name__ == '__main__':
     from dataset.vis import plot_skeleton, test_one, test_multi, plot_points
     from dataset.ntu_skeleton import NTU_SKE, edge, edge1, edge9
 
-    vid = 'S001C001P003R001A032'  # 9 walking towards each other 两个人的不太好
-    # vid = 'S004C001P003R001A008'  # 9 sitting down
-    # vid = 'S004C001P003R001A004'  # 25 brushing hair
-    # vid = 'S004C001P003R001A043'  # 43 falling
-    # vid = 'S004C001P003R001A038'  # falling
+    vid = 'S001C001P003R001A032'
     data_path = "../../data/ntu60/CS/test_data.npy"
     label_path = "../../data/ntu60/CS/test_label.pkl"
 
@@ -47,7 +43,7 @@ if __name__ == '__main__':
     }
 
     dataset = NTU_SKE(data_path, label_path, **kwards)
-    labels = open('../prepare/ntu/statistics/class_name.txt', 'r').readlines()
+    labels = open('../prepare/ntu60/statistics/class_name.txt', 'r').readlines()
 
     save_paths = ['../../vis_results/adaskeleton/{}/frame{}.png'.format(vid, i) for i in range(num_t)]
     test_one(dataset, plot_skeleton, lambda x: model.test(torch.from_numpy(x).unsqueeze(0))[1], vid=vid,

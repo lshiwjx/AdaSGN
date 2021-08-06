@@ -28,11 +28,11 @@ data_param:
 model: 'single_sgn'
 model_param:
   seg: 20
-  num_joint: 1  # 1, 9, 25
+  num_joint: 25  # 1, 9, 25
   dim: 256
   num_joint_ori: 25
   adaptive_transform: True
-  gcn_type: 'small'  # small, big
+  gcn_type: 'big'  # small, big
 
 pipeline: 'classify'
 pipeline_param:
@@ -62,7 +62,7 @@ worker: 32
 pin_memory: False
 max_epoch: 120
 num_epoch_per_save: 50
-model_saved_name: '../work_dir/ntu60/single_sgn_jpt1_small'
+model_saved_name: '../work_dir/ntu60/single_sgn_jpt25_big'
 last_model:
 pre_trained_model:
 ignore_weights: []

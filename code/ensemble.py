@@ -5,7 +5,7 @@ import numpy as np
 from tqdm import tqdm
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--label', default='/home/lshi/Project/Pytorch/EfficientVideoNet/data/ntu60/CS/test_label.pkl', help='')
+parser.add_argument('--label', default='../data/ntu60/CS/test_label.pkl', help='')
 parser.add_argument('--joint', default='../work_dir/ntu60/sgn')
 parser.add_argument('--bone', default='../work_dir/ntu60/sgn_bone')
 parser.add_argument('--vel', default='../work_dir/ntu60/sgn_vel')

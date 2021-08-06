@@ -39,12 +39,12 @@ model_param:
   tau_decay: -0.045
   tau_type: 'linear'
   pre_trains: [
-                 '../pretrain_models/ntucs/single_sgn_jpt1_small.state',
-                 '../pretrain_models/ntucs/single_sgn_jpt1_big.state',
-                 '../pretrain_models/ntucs/single_sgn_jpt9_small.state',
-                 '../pretrain_models/ntucs/single_sgn_jpt9_big.state',
-                 '../pretrain_models/ntucs/single_sgn_jpt25_small.state',
-                 '../pretrain_models/ntucs/single_sgn_jpt25_big.state',
+                 '../work_dir/ntu60/single_sgn_jpt1_small-best.state',
+                 '../work_dir/ntu60/single_sgn_jpt1_big-best.state',
+                 '../work_dir/ntu60/single_sgn_jpt9_small-best.state',
+                 '../work_dir/ntu60/single_sgn_jpt9_big-best.state',
+                 '../work_dir/ntu60/single_sgn_jpt25_small-best.state',
+                 '../work_dir/ntu60/single_sgn_jpt25_big-best.state',
   ]
   init_num: 100  # init temporal net and fc
 

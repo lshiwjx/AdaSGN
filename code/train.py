@@ -47,6 +47,7 @@ class Processor:
         self.score_dict = None
         self.all_pre_true = None
         self.wrong_path_pre_true = None
+        self.numj_per_action = None
         self.epoch = 0
 
         self.acces = Recorder(larger_is_better=True, previous_items=self.start_epoch)
@@ -99,6 +100,15 @@ class Processor:
                         param['lr'] = self.lr
                         param['weight_decay'] = self.weight_decay
 
+    def save_others(self):
+        with open(self.args.model_saved_name + '/score.pkl', 'wb') as f:
+            pickle.dump(self.score_dict, f)
+        with open(self.args.model_saved_name + '/all_pre_true.txt', 'w') as f:
+            f.writelines(self.all_pre_true)
+        with open(self.args.model_saved_name + '/wrong_path_pre_true.txt', 'w') as f:
+            f.writelines(self.wrong_path_pre_true)
+        np.save(self.args.model_saved_name + '/action.npy', np.array(self.numj_per_action))
+
     def save_model(self):
         # save latest
         m = self.model.module.state_dict()
@@ -116,23 +126,18 @@ class Processor:
                        self.args.model_saved_name + '-' + str(self.epoch) + '-' + str(self.global_step) + '.state')
 
         if self.acces.is_current_best():  # save best
-            save_score = self.args.model_saved_name + '/score.pkl'
-            with open(save_score, 'wb') as f:
-                pickle.dump(self.score_dict, f)
-            with open(self.args.model_saved_name + '/all_pre_true.txt', 'w') as f:
-                f.writelines(self.all_pre_true)
-            with open(self.args.model_saved_name + '/wrong_path_pre_true.txt', 'w') as f:
-                f.writelines(self.wrong_path_pre_true)
             torch.save(save, self.args.model_saved_name + '-best.state')
+            self.save_others()
 
     def start(self):
         try:
             if self.args.val_first or self.args.eval:
                 self.model.eval()
-                loss, acc, self.score_dict, self.all_pre_true, self.wrong_path_pre_true = self.val_net(
+                loss, acc, self.score_dict, self.numj_per_action, self.all_pre_true, self.wrong_path_pre_true = self.val_net(
                     self.data_loader_val, self.model, self.loss_function, self.global_step, self.args, None, self.block,
                     self.epoch)
                 self.block.log('Init ACC: {}'.format(acc))
+                self.save_others()
                 if self.args.eval:
                     exit()
 
@@ -147,7 +152,7 @@ class Processor:
                 # self.block.log('Training finished for epoch {}'.format(self.epoch))
 
                 self.model.eval()
-                loss, acc, self.score_dict, self.all_pre_true, self.wrong_path_pre_true = self.val_net(
+                loss, acc, self.score_dict, self.numj_per_action, self.all_pre_true, self.wrong_path_pre_true = self.val_net(
                     self.data_loader_val, self.model, self.loss_function, self.global_step, self.args, self.val_writer,
                     self.block, self.epoch)
                 # self.block.log('Validation finished for epoch {}'.format(self.epoch))

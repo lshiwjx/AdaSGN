@@ -17,7 +17,7 @@ if __name__ == '__main__':
                    policy_type='tconv', tau=1e-5, pre_trains=None, init_type='random', init_num=5,
                    adaptive_transform=[True, True, True], gcn_types=['small', 'big'])
     pretrained_dict = torch.load(
-        '../../work_dir/shrec28/sgnadapre_alpha2warm5_policyran_lineartau5_transformfix30_models6fix30_lr0001-best.state',
+        '../../work_dir/shrec28/sgnadapre-best.state',
         map_location='cpu')['model']
     model_dict = model.state_dict()
     pretrained_dict = {k: v for k, v in pretrained_dict.items() if k in model_dict}
@@ -30,9 +30,7 @@ if __name__ == '__main__':
     from dataset.vis import plot_skeleton, test_one, test_multi, plot_points
     from dataset.shrec_skeleton import SHC_SKE, edge, edge1, edge11
 
-    vid = '7_1_1_1'  # gesture, finger, sub, env
-    # 7 swip right only 1 point
-    # 1211 grab all
+    vid = '7_1_1_1'
     data_path = "../../data/shrec/val_skeleton.pkl"
     label_path = "../../data/shrec/val_label_28.pkl"
 

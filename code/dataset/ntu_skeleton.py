@@ -28,9 +28,6 @@ class NTU_SKE(Skeleton):
 if __name__ == '__main__':
     from dataset.vis import plot_skeleton, test_one, test_multi, plot_points, get_pts_from_sparse_array, get_pts_from_volume
     from utility.vis_env import *
-    # vid = 'S004C001P003R001A032'  # ntu120
-    # data_path = "/home/lshi/Database/ntu_60/xsub/train_data_joint.npy"  # 16487+40091
-    # label_path = "/home/lshi/Database/ntu_60/xsub/train_label.pkl"
 
     vid = 'S004C001P003R001A058'  # ntu60
     data_path = "../../data/ntu120/CS/test_data.npy"  # 63026+50919

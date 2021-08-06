@@ -39,7 +39,9 @@ def val_ada(data_loader, model, loss_function, global_step, args, writer, loger,
     process = tqdm(IteratorTimer(data_loader), desc='Val: ')
     score_frag = []
     numj_per_action = [[] for i in range(args.class_num)]
-    numjs = np.array([1, 1, 11, 11, 22, 22])
+    numjs = np.array(args.model_param.num_joints)
+    num_model = len(args.model_param.gcn_types)
+    numjs = numjs.repeat(num_model)
     all_pre_true = []
     wrong_path_pre_ture = []
     acces = Recorder()
@@ -67,8 +69,8 @@ def val_ada(data_loader, model, loss_function, global_step, args, writer, loger,
                 wrong_path_pre_ture.append(str(names[i]) + ',' + str(x) + ',' + str(true[i]) + '\n')
 
         for i in range(actions.shape[1]):
-            a = actions[:, i, 0, 0, 0].mean(-1).cpu().numpy()
-            numj_per_action[true[i]].append(a)
+            a = actions[:, i, :, 0, 0].mean(2).mean(-1).cpu().numpy()  # num_actionxNxMx1x1xT -> num_action, only the first obj
+            numj_per_action[true[i]].append(a)  # average actions for cls true[i]
 
         right_num = torch.sum(predict_label == labels.data).item()
         batch_num = labels.data.size(0)
@@ -86,7 +88,7 @@ def val_ada(data_loader, model, loss_function, global_step, args, writer, loger,
     score_dict = dict(zip(data_loader.dataset.sample_name, score))
 
     for i, l in enumerate(numj_per_action):
-        numj_per_action[i] = sum(sum(l)/len(l)*numjs)
+        numj_per_action[i] = sum(sum(l)/len(l)*numjs)  # percent of actions x number of joints for corresponding actions
 
     process.close()
 
@@ -100,4 +102,4 @@ def val_ada(data_loader, model, loss_function, global_step, args, writer, loger,
         writer.add_scalar('ls_uniform', ls_uniform.item(), global_step)
         writer.add_scalar('batch time', process.iterable.last_duration, global_step)
 
-    return loss_flops.avg + loss_cls.avg, acces.avg, score_dict, all_pre_true, wrong_path_pre_ture
+    return loss_flops.avg + loss_cls.avg, acces.avg, score_dict, numj_per_action, all_pre_true, wrong_path_pre_ture

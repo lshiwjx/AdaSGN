@@ -97,34 +97,4 @@ def val_classifier(data_loader, model, loss_function, global_step, args, writer,
         writer.add_scalar('acc', accuracy, global_step)
         writer.add_scalar('batch time', process.iterable.last_duration, global_step)
 
-    return loss, accuracy, score_dict, all_pre_true, wrong_path_pre_ture
-
-
-if __name__ == '__main__':
-    from easydict import EasyDict as edict
-    from dataset.image_pair import ImagePair, DataLoader
-    from model.image_to_video import ImageToVideo
-    from train_val_test.loss import ImageToVideoLoss
-
-    m = ImageToVideo(8, 128, 128)
-    data_path = '/data00/shilei.stone/plot_human/train/'
-    data = ImagePair(data_path, w=128, h=128)
-    loader = DataLoader(data, batch_size=8, shuffle=True, num_workers=0, drop_last=True)
-    # f1, f2, video_path = data.__getitem__(100)
-    # f1, f2 = torch.Tensor([f1]), torch.Tensor([f2])
-    # flow = m(f1, video_path)
-
-    loss = ImageToVideoLoss(w=128, h=128)
-    # ls = loss(f1, f2, flow)
-
-    params = []
-    for key, value in m.named_parameters():
-        if value.requires_grad:
-            params += [{'params': [value], 'lr': 0.001, 'key': key, 'weight_decay': 0.0005}]
-    optimizer = torch.optim.Adam(params)
-
-    args = edict({'model':'train_val'})
-
-    global_step = train_flow(loader, m, loss, optimizer, args)
-
-    print('finish')
+    return loss, accuracy, score_dict, [0], all_pre_true, wrong_path_pre_ture
